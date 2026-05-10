@@ -992,6 +992,209 @@
             .auth-profile-text b { max-width: 105px; }
         }
 
+
+        /* RESPONSIVE DESKTOP/LAPTOP LAYOUT */
+        html, body {
+            min-width: 0;
+        }
+
+        header {
+            min-height: 70px;
+            height: auto;
+            flex-wrap: wrap;
+            align-content: center;
+            row-gap: 10px;
+        }
+
+        .logo {
+            flex: 0 0 auto;
+        }
+
+        .settings-bar {
+            flex: 1 1 520px;
+            min-width: 360px;
+            flex-wrap: wrap;
+            row-gap: 8px;
+        }
+
+        .settings-bar select {
+            max-width: min(230px, 100%);
+        }
+
+        .project-info-panel {
+            flex: 0 1 auto;
+            min-width: 0;
+            flex-wrap: nowrap;
+        }
+
+        .project-info-panel input {
+            width: clamp(120px, 10vw, 160px);
+            min-width: 0;
+        }
+
+        .btn-print {
+            white-space: nowrap;
+            padding-left: 14px;
+            padding-right: 14px;
+        }
+
+        .auth-profile {
+            flex: 0 0 220px;
+            min-width: 180px;
+        }
+
+        .main-content {
+            min-height: 0;
+        }
+
+        .toolbar {
+            flex: 0 0 clamp(220px, 15vw, 270px);
+            width: clamp(220px, 15vw, 270px);
+        }
+
+        .sidebar {
+            flex: 0 0 clamp(320px, 25vw, 430px);
+            width: clamp(320px, 25vw, 430px);
+            min-width: 0;
+        }
+
+        .workspace {
+            min-width: 0;
+        }
+
+        .calc-table {
+            font-size: clamp(.74rem, .72vw, .85rem);
+        }
+
+        @media (max-width: 1500px) {
+            header {
+                gap: 12px;
+                padding: 8px 14px;
+            }
+
+            .logo {
+                font-size: 1rem;
+                padding: 9px 12px;
+            }
+
+            .settings-bar {
+                gap: 9px;
+                padding-left: 12px;
+            }
+
+            .settings-bar label {
+                font-size: .68rem;
+            }
+
+            .settings-bar input,
+            .settings-bar select {
+                font-size: .78rem;
+                padding: 6px 8px;
+            }
+
+            .project-info-panel {
+                gap: 8px;
+            }
+
+            .project-info-panel input {
+                width: 132px;
+                font-size: .78rem;
+            }
+
+            .btn-print {
+                padding: 9px 12px;
+                font-size: .72rem;
+            }
+
+            .auth-profile {
+                flex-basis: 58px;
+                min-width: 58px;
+            }
+
+            .auth-profile-main {
+                padding: 7px;
+                justify-content: center;
+            }
+
+            .auth-profile-text,
+            .auth-chevron {
+                display: none;
+            }
+
+            .auth-profile-menu {
+                right: 0;
+            }
+
+            .toolbar {
+                flex-basis: 230px;
+                width: 230px;
+                padding: 13px;
+            }
+
+            .sidebar {
+                flex-basis: 360px;
+                width: 360px;
+                padding: 16px;
+            }
+
+            .tool-btn {
+                font-size: .76rem;
+                padding: 9px;
+            }
+        }
+
+        @media (max-width: 1250px) {
+            body {
+                overflow: auto;
+            }
+
+            header {
+                position: relative;
+            }
+
+            .main-content {
+                min-width: 1120px;
+            }
+
+            .toolbar {
+                flex-basis: 220px;
+                width: 220px;
+            }
+
+            .sidebar {
+                flex-basis: 330px;
+                width: 330px;
+            }
+        }
+
+        @media (max-height: 760px) {
+            header {
+                min-height: 62px;
+                padding-top: 6px;
+                padding-bottom: 6px;
+            }
+
+            .toolbar,
+            .sidebar {
+                padding-top: 12px;
+                padding-bottom: 12px;
+            }
+
+            .tool-group-label {
+                margin-top: 9px;
+            }
+
+            .tool-btn {
+                min-height: 34px;
+                padding-top: 8px;
+                padding-bottom: 8px;
+            }
+
+            .app-footer {
+                height: 28px;
+            }
+        }
+
         /* PRINT MEDIA */
         #print-area { display: none; }
 
