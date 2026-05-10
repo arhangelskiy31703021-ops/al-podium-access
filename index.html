@@ -1460,7 +1460,7 @@
         #print-area { display: none; }
 
         @media print {
-            @page { size: A4 portrait; margin: 6mm; }
+            @page { size: A4 portrait; margin: 5mm; }
             * { box-sizing: border-box; }
             header, .toolbar, .sidebar, .app-footer, .modal-3d, #password-overlay { display: none !important; }
             body, html {
@@ -1493,11 +1493,11 @@
             }
             .print-header {
                 display: grid;
-                grid-template-columns: 1fr 110px;
-                gap: 8px;
+                grid-template-columns: 1fr 105px;
+                gap: 6px;
                 border-bottom: 2px solid #000;
-                padding-bottom: 4px;
-                margin-bottom: 5px;
+                padding-bottom: 3px;
+                margin-bottom: 4px;
                 page-break-inside: avoid;
             }
             .print-header-title {
@@ -1512,12 +1512,12 @@
                 border-collapse: collapse;
                 table-layout: fixed;
                 margin-top: 3px;
-                margin-bottom: 5px;
+                margin-bottom: 4px;
                 page-break-inside: avoid;
             }
             .print-views-table td {
                 border: 1.1px solid #000;
-                padding: 3px;
+                padding: 2px;
                 vertical-align: top;
                 background: #fff;
             }
@@ -1530,7 +1530,7 @@
             }
             .scheme-print-box {
                 width: 100%;
-                height: 315px;
+                height: 285px;
                 position: relative;
                 overflow: hidden;
                 background: white;
@@ -1538,7 +1538,7 @@
             }
             .print-3d-cell {
                 width: 100%;
-                height: 88px;
+                height: 145px;
                 position: relative;
                 overflow: hidden;
                 background: #f8fafc;
@@ -1564,7 +1564,7 @@
                 width: 100%;
                 border-collapse: collapse;
                 margin-top: 5px;
-                font-size: 6.6px;
+                font-size: 6.8px;
                 page-break-inside: auto;
                 table-layout: fixed;
             }
@@ -3817,8 +3817,8 @@
             outerWrap.style.overflow = 'hidden';
 
             const maxW = Math.max(100, pScheme.clientWidth || 900);
-            const maxH = Math.max(100, pScheme.clientHeight || 315);
-            const scale = Math.min(1, (maxW * 0.97) / bw, (maxH * 0.97) / bh);
+            const maxH = Math.max(100, pScheme.clientHeight || 285);
+            const scale = Math.min(1, (maxW * 0.985) / bw, (maxH * 0.985) / bh);
 
             wrap.style.position = 'absolute';
             wrap.style.left = '50%';
@@ -4829,10 +4829,10 @@
         }
 
         const views = {
-            iso: get3DSnapshot('iso', 'Изометрия', 900, 520, 1.0, 'contain'),
-            front: get3DSnapshot('front', 'Вид спереди', 900, 520, 1.0, 'contain'),
-            side: get3DSnapshot('side', 'Вид сбоку', 900, 520, 1.0, 'contain'),
-            top: get3DSnapshot('top', 'Вид сверху', 900, 520, 1.0, 'contain')
+            iso: get3DSnapshot('iso', 'Изометрия', 1200, 760, 1.08, 'contain'),
+            front: get3DSnapshot('front', 'Вид спереди', 1200, 760, 1.08, 'contain'),
+            side: get3DSnapshot('side', 'Вид сбоку', 1200, 760, 1.08, 'contain'),
+            top: get3DSnapshot('top', 'Вид сверху', 1200, 760, 1.08, 'contain')
         };
 
         Object.entries(views).forEach(([key, view]) => {
