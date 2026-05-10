@@ -879,6 +879,119 @@
             transform: translateY(-1px);
         }
 
+
+        .auth-profile {
+            position: relative;
+            margin-left: 8px;
+            min-width: 230px;
+            z-index: 200;
+        }
+        .auth-profile-main {
+            width: 100%;
+            border: 1px solid rgba(56,189,248,.34);
+            background: rgba(2,6,23,.55);
+            color: #f8fafc;
+            border-radius: 16px;
+            padding: 8px 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,.06), 0 10px 26px rgba(0,0,0,.18);
+        }
+        .auth-avatar {
+            width: 34px;
+            height: 34px;
+            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #38bdf8, #8b5cf6);
+            color: white;
+            font-weight: 1000;
+            flex: 0 0 auto;
+        }
+        .auth-profile-text {
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            text-align: left;
+            line-height: 1.15;
+        }
+        .auth-profile-text b {
+            font-size: 12px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 145px;
+        }
+        .auth-profile-text small {
+            margin-top: 3px;
+            font-size: 10px;
+            color: #93c5fd;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+        }
+        .auth-chevron {
+            margin-left: auto;
+            color: #7dd3fc;
+            font-weight: 900;
+        }
+        .auth-profile-menu {
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            width: 270px;
+            display: none;
+            padding: 12px;
+            border-radius: 18px;
+            background: rgba(15,23,42,.98);
+            border: 1px solid rgba(56,189,248,.28);
+            box-shadow: 0 22px 70px rgba(0,0,0,.34);
+        }
+        .auth-profile.open .auth-profile-menu {
+            display: block;
+        }
+        .auth-menu-title {
+            color: #7dd3fc;
+            font-size: 11px;
+            font-weight: 1000;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            margin-bottom: 7px;
+        }
+        .auth-menu-email {
+            color: #f8fafc;
+            font-size: 13px;
+            font-weight: 800;
+            padding: 10px;
+            border-radius: 12px;
+            background: rgba(2,6,23,.55);
+            border: 1px solid rgba(148,163,184,.14);
+            overflow-wrap: anywhere;
+            margin-bottom: 10px;
+        }
+        .auth-profile-menu button {
+            width: 100%;
+            border: 1px solid rgba(148,163,184,.18);
+            background: rgba(30,41,59,.72);
+            color: #f8fafc;
+            padding: 10px 11px;
+            border-radius: 12px;
+            font-weight: 900;
+            cursor: pointer;
+            margin-top: 7px;
+        }
+        .auth-profile-menu button:hover {
+            border-color: rgba(56,189,248,.55);
+            background: rgba(30,41,59,.95);
+        }
+        @media (max-width: 1100px) {
+            .auth-profile { min-width: 190px; }
+            .auth-profile-text b { max-width: 105px; }
+        }
+
         /* PRINT MEDIA */
         #print-area { display: none; }
 
@@ -1097,6 +1210,23 @@
         <input type="text" id="user-fio" placeholder="ФИО Менеджера..." oninput="updateAll()">
         <input type="text" id="project-name" placeholder="Заказчик / Объект..." oninput="updateAll()">
         <button class="btn-print" onclick="preparePrintAndPrint()">🖨 Печать PDF</button>
+    </div>
+
+    <div class="auth-profile" id="auth-profile" style="display:none;">
+        <button class="auth-profile-main" type="button" onclick="toggleProfileMenu()">
+            <span class="auth-avatar" id="auth-avatar">?</span>
+            <span class="auth-profile-text">
+                <b id="auth-email-display">Пользователь</b>
+                <small id="auth-status-display">Supabase</small>
+            </span>
+            <span class="auth-chevron">▾</span>
+        </button>
+        <div class="auth-profile-menu" id="auth-profile-menu">
+            <div class="auth-menu-title">Профиль</div>
+            <div class="auth-menu-email" id="auth-menu-email">—</div>
+            <button type="button" onclick="refreshProfileInfo()">↻ Обновить профиль</button>
+            <button type="button" onclick="logoutApp()">🚪 Выйти</button>
+        </div>
     </div>
 </header>
 
@@ -1472,6 +1602,8 @@
             const { error } = await sb.auth.signInWithPassword({ email, password });
             if(error) throw error;
 
+            const { data: sessionData } = await getSupabaseClient().auth.getSession();
+            updateProfilePanel(sessionData?.session || null);
             const overlay = document.getElementById('password-overlay');
             if(overlay) overlay.style.display = 'none';
         } catch(err) {
@@ -1508,6 +1640,54 @@
         }
     }
 
+
+    function updateProfilePanel(session) {
+        const profile = document.getElementById('auth-profile');
+        const emailDisplay = document.getElementById('auth-email-display');
+        const emailMenu = document.getElementById('auth-menu-email');
+        const avatar = document.getElementById('auth-avatar');
+        const status = document.getElementById('auth-status-display');
+
+        const email = session?.user?.email || '';
+        if(!profile) return;
+
+        if(email) {
+            profile.style.display = 'block';
+            if(emailDisplay) emailDisplay.textContent = email;
+            if(emailMenu) emailMenu.textContent = email;
+            if(avatar) avatar.textContent = email.slice(0,1).toUpperCase();
+            if(status) status.textContent = 'Вход выполнен';
+        } else {
+            profile.style.display = 'none';
+            profile.classList.remove('open');
+            if(emailDisplay) emailDisplay.textContent = 'Пользователь';
+            if(emailMenu) emailMenu.textContent = '—';
+            if(avatar) avatar.textContent = '?';
+            if(status) status.textContent = 'Supabase';
+        }
+    }
+
+    function toggleProfileMenu() {
+        const profile = document.getElementById('auth-profile');
+        if(profile) profile.classList.toggle('open');
+    }
+
+    async function refreshProfileInfo() {
+        try {
+            const sb = getSupabaseClient();
+            const { data } = await sb.auth.getSession();
+            updateProfilePanel(data?.session || null);
+        } catch(err) {
+            console.warn(err);
+        }
+    }
+
+    document.addEventListener('click', (event) => {
+        const profile = document.getElementById('auth-profile');
+        if(profile && !profile.contains(event.target)) profile.classList.remove('open');
+    });
+
+
     async function logoutApp() {
         try {
             if(isSupabaseConfigured()) {
@@ -1516,6 +1696,7 @@
         } catch(err) {
             console.warn(err);
         }
+        updateProfilePanel(null);
         const overlay = document.getElementById('password-overlay');
         if(overlay) {
             overlay.style.display = 'flex';
@@ -1540,6 +1721,7 @@
         if(!overlay) return;
 
         if(!isSupabaseConfigured()) {
+            updateProfilePanel(null);
             overlay.style.display = 'flex';
             setTimeout(() => setAuthError('Supabase не настроен: вставьте SUPABASE_URL и SUPABASE_ANON_KEY.'), 50);
             attachAuthEnterHandlers();
@@ -1550,13 +1732,16 @@
             const sb = getSupabaseClient();
             const { data } = await sb.auth.getSession();
             if(data && data.session) {
+                updateProfilePanel(data.session);
                 overlay.style.display = 'none';
             } else {
+                updateProfilePanel(null);
                 overlay.style.display = 'flex';
                 attachAuthEnterHandlers();
             }
 
             sb.auth.onAuthStateChange((_event, session) => {
+                updateProfilePanel(session);
                 const currentOverlay = document.getElementById('password-overlay');
                 if(currentOverlay) currentOverlay.style.display = session ? 'none' : 'flex';
             });
