@@ -1,0 +1,4192 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AL-PODIUM IMLIGHT: Профессиональный инженерный расчет</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script type="text/javascript" src="https://gc.kis.v2.scr.kaspersky-labs.com/FD126C42-EBFA-4E12-B309-BB3FDD723AC1/main.js?attr=IF_jcFLkpAwoHNbwVvzGPs9iur6yRKC1K5uuCNYqAkk_LFoxyO9nL5qPZ2nB82KCtfi3So_6TSr5YnKqPg3M3lriVFFvuMXqrSjy9UjA-Uq_p7I5cBjX3Whu_X_JcK6_n3GHRFE3Kmp9VjQM28IXKfpO0ch9Z9ybF1le4AVu3evsfbmAD6ZOXiy1HYPQYTuXGxRzlIYKyE3y9jiXaD8akxv6RqNX9K7W34vBCy3kzMgdiALK6ZhrqJnqCxGrxVL1BaSdZ5Xlhkk0QvpO-IpIcw" charset="UTF-8"></script><style>
+        :root {
+            --bg-deep: #0f172a;
+            --bg-panel: #1e293b;
+            --accent: #38bdf8;
+            --text: #f1f5f9;
+            --border: #334155;
+            --danger: #ef4444;
+            --valid: #10b981;
+            --warning: #fbbf24;
+            --panel-highlight: #27354f;
+            --drawing-bg: #f8fafc;
+            --drawing-line: #000000;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: var(--bg-deep);
+            color: var(--text);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        /* HEADER */
+        header {
+            height: 70px;
+            background: var(--bg-panel);
+            border-bottom: 2px solid var(--accent);
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            gap: 20px;
+            z-index: 100;
+        }
+
+        .logo { font-size: 1.1rem; min-width: max-content; color: var(--text); letter-spacing: 0.5px; }
+        .logo b { font-weight: 800; }
+        .logo span { font-weight: 300; opacity: 0.9; }
+
+        .settings-bar { display: flex; align-items: center; gap: 12px; border-left: 1px solid var(--border); padding-left: 20px; }
+        .settings-bar label { font-size: 0.75rem; color: #94a3b8; font-weight: 600; text-transform: uppercase; }
+        .settings-bar input, .settings-bar select {
+            background: #0f172a; border: 1px solid var(--border); color: white;
+            padding: 6px 10px; border-radius: 6px; font-size: 0.85rem; outline: none;
+        }
+        .settings-bar input:focus, .settings-bar select:focus { border-color: var(--accent); }
+        .settings-bar input[type="number"] { width: 60px; }
+        
+        .doubt-toggle { display: flex; align-items: center; gap: 6px; cursor: pointer; user-select: none; }
+        .doubt-toggle input { cursor: pointer; accent-color: var(--warning); width: 16px; height: 16px; }
+        .doubt-toggle span { font-size: 0.75rem; color: var(--warning); font-weight: 600; text-transform: uppercase; }
+
+        .project-info-panel {
+            display: flex; align-items: center; gap: 10px; margin-left: auto;
+        }
+        .project-info-panel input {
+            background: var(--panel-highlight); border: 1px solid var(--border); color: white;
+            padding: 8px 12px; border-radius: 6px; font-size: 0.85rem; width: 150px;
+        }
+
+        .btn-print {
+            padding: 10px 20px; background: var(--accent); color: var(--bg-deep);
+            border: none; border-radius: 6px; font-weight: 800; cursor: pointer; transition: 0.2s;
+            display: flex; align-items: center; gap: 8px; text-transform: uppercase; font-size: 0.8rem;
+        }
+        .btn-print:hover { background: #7dd3fc; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(56, 189, 248, 0.2); }
+
+        /* MAIN CONTENT */
+        .main-content { display: flex; flex: 1; overflow: hidden; }
+
+        .toolbar {
+            width: 250px; background: var(--bg-panel); border-right: 1px solid var(--border);
+            display: flex; flex-direction: column; padding: 15px; gap: 8px; overflow-y: auto; z-index: 10;
+        }
+        .tool-group-label { font-size: 0.65rem; text-transform: uppercase; color: #64748b; margin-top: 12px; font-weight: 700; border-bottom: 1px solid var(--border); padding-bottom: 4px; }
+        .tool-group-label:first-child { margin-top: 0; }
+        
+        .tool-btn {
+            width: 100%; padding: 10px; background: var(--bg-deep);
+            border: 1px solid var(--border); border-radius: 6px; color: #cbd5e1;
+            cursor: pointer; font-size: 0.8rem; font-weight: 600; text-align: left; transition: 0.2s;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .tool-btn:hover { background: #1e293b; border-color: var(--accent); color: white; }
+        .tool-btn.active { background: var(--accent); color: var(--bg-deep); border-color: var(--accent); }
+
+        .tool-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .tool-row .tool-btn { text-align:center; justify-content:center; min-height:38px; }
+        .tool-select-small {
+            width: 100%;
+            background: var(--bg-deep);
+            border: 1px solid var(--border);
+            border-radius: 7px;
+            color: var(--text);
+            padding: 9px 8px;
+            font-size: .78rem;
+            font-weight: 700;
+            outline: none;
+        }
+        .tool-select-small:focus { border-color: var(--accent); }
+        .tool-check {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 8px;
+            background: rgba(15,23,42,.75);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: #cbd5e1;
+            font-size: .74rem;
+            font-weight: 700;
+            line-height: 1.2;
+            cursor: pointer;
+            user-select: none;
+        }
+        .tool-check input { width: 16px; height: 16px; accent-color: var(--accent); cursor: pointer; }
+
+        .tool-select {
+            width: 100%;
+            background: var(--bg-deep);
+            border: 1px solid var(--accent);
+            border-radius: 8px;
+            color: var(--text);
+            padding: 10px 8px;
+            font-size: .78rem;
+            font-weight: 700;
+            outline: none;
+            cursor: pointer;
+        }
+        .tool-select option { background: var(--bg-panel); color: var(--text); }
+        .tool-check {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 8px;
+            background: rgba(15,23,42,.75);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: #cbd5e1;
+            font-size: .74rem;
+            font-weight: 700;
+            line-height: 1.2;
+            cursor: pointer;
+            user-select: none;
+        }
+        .tool-check input { width: 16px; height: 16px; accent-color: var(--accent); cursor: pointer; }
+
+        .tool-dropdown {
+            width: 100%;
+            border: 1px solid var(--accent);
+            border-radius: 10px;
+            overflow: hidden;
+            background: var(--bg-deep);
+            box-shadow: 0 8px 20px rgba(0,0,0,.18);
+        }
+        .tool-dropdown-head {
+            width: 100%;
+            min-height: 44px;
+            border: none;
+            background: linear-gradient(180deg, #10233f, #0f172a);
+            color: var(--text);
+            padding: 10px 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            cursor: pointer;
+            font-size: .82rem;
+            font-weight: 800;
+            text-align: left;
+        }
+        .tool-dropdown-head:hover { background: #162844; }
+        .tool-dropdown-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            overflow: hidden;
+        }
+        .tool-current {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .tool-arrow {
+            width: 18px;
+            height: 18px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform .25s ease;
+            flex: 0 0 auto;
+            opacity: .9;
+        }
+        .tool-dropdown.open .tool-arrow { transform: rotate(180deg); }
+        .tool-dropdown-body {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height .35s ease;
+            border-top: 1px solid transparent;
+        }
+        .tool-dropdown.open .tool-dropdown-body {
+            max-height: 720px;
+            border-top-color: var(--border);
+        }
+        .tool-menu-section { border-top: 1px solid rgba(255,255,255,.06); }
+        .tool-menu-section:first-child { border-top: 0; }
+        .tool-section-head {
+            width: 100%;
+            border: 0;
+            background: rgba(30,41,59,.75);
+            color: #cbd5e1;
+            padding: 10px 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: .74rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: .03em;
+        }
+        .tool-section-head:hover { background: rgba(51,65,85,.85); color: white; }
+        .section-arrow {
+            transition: transform .22s ease;
+            opacity: .75;
+        }
+        .tool-menu-section.open .section-arrow { transform: rotate(90deg); }
+        .tool-section-body {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height .32s ease;
+            background: rgba(2,6,23,.22);
+        }
+        .tool-menu-section.open .tool-section-body { max-height: 420px; }
+        .tool-menu-item {
+            width: 100%;
+            border: 0;
+            border-top: 1px solid rgba(255,255,255,.045);
+            background: transparent;
+            color: #e2e8f0;
+            padding: 10px 12px 10px 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            cursor: pointer;
+            font-size: .82rem;
+            font-weight: 700;
+            text-align: left;
+        }
+        .tool-menu-item:hover { background: rgba(56,189,248,.12); color: #fff; }
+        .tool-menu-item.active {
+            background: var(--accent);
+            color: var(--bg-deep);
+        }
+        .tool-menu-item .tool-sub {
+            font-size: .68rem;
+            opacity: .72;
+            font-weight: 800;
+            margin-left: auto;
+            white-space: nowrap;
+        }
+        .tool-dropdown-hint {
+            padding: 9px 12px;
+            color: #94a3b8;
+            font-size: .67rem;
+            line-height: 1.35;
+            border-top: 1px solid rgba(255,255,255,.06);
+        }
+
+        /* WORKSPACE */
+        .workspace {
+            flex: 1; position: relative; background: var(--drawing-bg);
+            overflow: auto; cursor: crosshair;
+            background-image: linear-gradient(#e2e8f0 1px, transparent 1px), linear-gradient(90deg, #e2e8f0 1px, transparent 1px);
+            background-size: 40px 40px; /* 0.5m cell assuming GRID=80 */
+        }
+        #viewport {
+            position: absolute; width: 5000px; height: 5000px; padding: 2500px;
+            transform-origin: 0 0;
+        }
+
+        .platform-rect {
+            position: absolute; background: rgba(255, 255, 255, 0.9);
+            border: 2px solid var(--drawing-line); display: flex; align-items: center; justify-content: center;
+            font-weight: 800; font-size: 14px; color: #1e293b; z-index: 10; box-sizing: border-box; cursor: pointer;
+            transition: border-color 0.1s;
+        }
+        .platform-rect.selected { border: 3px solid var(--accent); background: rgba(56, 189, 248, 0.1); z-index: 11; }
+
+        .ghost {
+            position: absolute; pointer-events: none; border: 2px dashed var(--accent);
+            background: rgba(56, 189, 248, 0.15); z-index: 200; box-sizing: border-box; transform: translate(-50%, -50%);
+            transition: background 0.1s, border-color 0.1s;
+        }
+        .ghost.invalid {
+            border-color: var(--danger);
+            background: rgba(239, 68, 68, 0.25);
+        }
+
+        .marker { position: absolute; transform: translate(-50%, -50%); z-index: 60; pointer-events: none; }
+        
+        .leg-support {
+            width: 14px; height: 14px; background: white;
+            border: 2.5px solid var(--drawing-line); border-radius: 1px;
+        }
+
+        /* SIDEBAR (SPEC) */
+        .sidebar {
+            width: 400px; background: var(--bg-panel); border-left: 1px solid var(--border);
+            padding: 20px; display: flex; flex-direction: column; overflow-y: auto;
+        }
+        .calc-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-bottom: 20px; }
+        .calc-table th { text-align: left; color: #94a3b8; padding-bottom: 10px; border-bottom: 1px solid var(--border); font-weight: 600; }
+        .calc-table td { padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .num-col { text-align: right; font-weight: 700; color: white; font-family: 'JetBrains Mono', monospace; }
+        .sum-row td { color: var(--accent); font-weight: 800; border-top: 1px solid var(--border); padding-top: 15px; }
+
+        .legend-box { background: var(--bg-deep); border: 1px solid var(--border); border-radius: 8px; padding: 15px; margin-top: auto; }
+        .legend-item { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; font-size: 0.75rem; color: #cbd5e1; font-weight: 600; }
+        .legend-item:last-child { margin-bottom: 0; }
+        .legend-icon-wrap { width: 40px; display: flex; justify-content: center; align-items: center; background: white; border-radius: 4px; padding: 4px; box-sizing: border-box; }
+
+        /* FOOTER */
+        .app-footer {
+            height: 32px; background: var(--bg-deep); border-top: 1px solid var(--border);
+            display: flex; justify-content: space-between; align-items: center; padding: 0 20px;
+            font-size: 0.75rem; color: #94a3b8; z-index: 100;
+        }
+        .app-footer .stats span { color: white; font-weight: 600; margin-right: 20px; font-family: 'JetBrains Mono', monospace; }
+        .app-footer .author { font-family: 'JetBrains Mono', monospace; opacity: 0.5; }
+
+
+
+        /* ACCESSORIES: railings, stairs, diagonals, 3D */
+        .accessory-rail {
+            position: absolute; background: #0f172a; border: 1px solid #38bdf8; z-index: 45;
+            box-shadow: 0 0 0 2px rgba(56,189,248,.18); cursor: pointer; box-sizing: border-box;
+        }
+        .accessory-rail.manual { background: #0369a1; }
+        .accessory-stair {
+            position: absolute; z-index: 42; background: rgba(251,191,36,.10); border: 2px solid rgba(180,83,9,.80);
+            box-sizing: border-box; color: #78350f; font-size: 10px; font-weight: 800; display:flex; align-items:center; justify-content:center;
+            pointer-events: auto; cursor: pointer; opacity: .72; --stair-stripes: 0deg;
+        }
+        .accessory-stair::before {
+            content:""; position:absolute; inset:0;
+            background-image: repeating-linear-gradient(var(--stair-stripes), transparent 0, transparent 15px, rgba(180,83,9,.75) 16px, transparent 17px);
+            opacity:.9; pointer-events:none;
+        }
+        .diag-marker { position:absolute; z-index:38; pointer-events:none; overflow:visible; }
+        .frame-marker { position:absolute; z-index:37; pointer-events:none; overflow:visible; }
+        .rail-ghost-note {
+            position: absolute; left: 12px; bottom: 12px; z-index: 300; background: rgba(15,23,42,.9); color:white;
+            border:1px solid var(--border); border-radius:8px; padding:8px 12px; font-size:.75rem; display:none;
+        }
+        .accessory-ghost { position:absolute; z-index:220; pointer-events:none; display:none; opacity:.7; box-sizing:border-box; }
+        .accessory-ghost.rail { background: rgba(3,105,161,.20); border:2px dashed #0369a1; box-shadow:0 0 0 1px rgba(3,105,161,.12); }
+        .accessory-ghost.stair { background: rgba(251,191,36,.22); border:2px dashed #b45309; overflow:hidden; --stair-stripes: 0deg; }
+        .accessory-ghost.stair::before { content:""; position:absolute; inset:0; background-image: repeating-linear-gradient(var(--stair-stripes), transparent 0, transparent 15px, rgba(180,83,9,.78) 16px, transparent 17px); opacity:.95; }
+        .accessory-ghost.invalid { background: rgba(239,68,68,.22) !important; border-color:#ef4444 !important; box-shadow:none; }
+
+        .accessory-ghost.diagonal,
+        .accessory-ghost.frame {
+            background: rgba(17,24,39,.06);
+            border: 2px dashed #111827;
+            overflow: hidden;
+        }
+        .accessory-ghost.diagonal::before,
+        .accessory-ghost.diagonal::after {
+            content:"";
+            position:absolute;
+            left:-8%;
+            top:50%;
+            width:116%;
+            height:4px;
+            background:#111827;
+            transform-origin:center;
+            opacity:.75;
+        }
+        .accessory-ghost.diagonal::before { transform: rotate(18deg); }
+        .accessory-ghost.diagonal::after { transform: rotate(-18deg); }
+        .accessory-ghost.frame {
+            border-color:#7c2d12;
+            background: rgba(124,45,18,.08);
+        }
+        .accessory-ghost.frame::before {
+            content:"";
+            position:absolute;
+            inset:6px;
+            border:2px solid #7c2d12;
+            opacity:.75;
+        }
+        .accessory-ghost.frame::after {
+            content:"";
+            position:absolute;
+            left:-8%;
+            top:50%;
+            width:116%;
+            height:3px;
+            background:#7c2d12;
+            transform: rotate(-18deg);
+            opacity:.75;
+        }
+        .accessory-rail.selected,
+        .accessory-stair.selected {
+            outline: 3px solid var(--accent);
+            outline-offset: 2px;
+        }
+        .rail-hardware-marker {
+            position:absolute;
+            z-index:65;
+            transform:translate(-50%,-50%);
+            width:18px;
+            height:18px;
+            pointer-events:none;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+        }
+        .rail-hardware-marker.joiner { z-index:66; }
+        .btn-3d { background:#10b981 !important; color:#052e16 !important; }
+        .modal-3d {
+            display:none; position: fixed; inset: 0; z-index: 5000; background: rgba(2,6,23,.86);
+            align-items: center; justify-content: center; padding: 24px;
+        }
+        .modal-3d.open { display:flex; }
+        .viewer3d-box {
+            width:min(1100px, 96vw); height:min(760px, 88vh); background:#f8fafc; color:#0f172a;
+            border-radius:18px; box-shadow:0 30px 90px rgba(0,0,0,.45); overflow:hidden; display:flex; flex-direction:column;
+        }
+        .viewer3d-head { background:#0f172a; color:#f8fafc; padding:14px 18px; display:flex; align-items:center; justify-content:space-between; border-bottom:3px solid #38bdf8; }
+        .viewer3d-head b { color:#38bdf8; }
+        .viewer3d-close { border:0; background:#ef4444; color:#fff; padding:8px 12px; border-radius:8px; font-weight:800; cursor:pointer; }
+        #viewer3d { flex:1; position:relative; overflow:auto; background: radial-gradient(circle at 40% 10%, #fff, #e2e8f0); }
+        .viewer3d-note { padding:8px 16px; font-size:.75rem; color:#475569; border-top:1px solid #cbd5e1; background:#fff; }
+        .viewer3d-toolbar { display:flex; gap:8px; padding:10px 14px; background:#f8fafc; border-bottom:1px solid #cbd5e1; }
+        .viewer3d-toolbar button { border:1px solid #94a3b8; background:#fff; color:#0f172a; padding:7px 10px; border-radius:8px; font-size:.78rem; font-weight:700; cursor:pointer; }
+        .viewer3d-toolbar button:hover { background:#e2e8f0; }
+        .viewer3d-toolbar button.active3d { background:#0ea5e9; color:#06121f; border-color:#0ea5e9; }
+        .viewer3d-toolbar .hint { margin-left:auto; align-self:center; color:#475569; font-size:.75rem; font-weight:600; }
+        #viewer3d canvas { display:block; width:100% !important; height:100% !important; background:#f8fafc; }
+
+
+        #password-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 999999;
+            min-height: 100vh;
+            background:
+                radial-gradient(circle at 16% 18%, rgba(139,92,246,.32), transparent 34%),
+                radial-gradient(circle at 78% 24%, rgba(14,165,233,.20), transparent 30%),
+                linear-gradient(135deg, #12081f 0%, #160b27 42%, #080f1d 100%);
+            color: #f8fafc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Inter', Arial, sans-serif;
+            padding: 34px;
+            overflow: auto;
+        }
+        .login-shell {
+            width: min(980px, calc(100vw - 40px));
+            min-height: 560px;
+            display: grid;
+            grid-template-columns: 1.05fr 1fr;
+            gap: 24px;
+            align-items: stretch;
+        }
+        .login-info-card,
+        .password-card {
+            border: 1px solid rgba(167,139,250,.26);
+            border-radius: 28px;
+            box-shadow: 0 28px 100px rgba(0,0,0,.38);
+            backdrop-filter: blur(18px);
+        }
+        .login-info-card {
+            position: relative;
+            overflow: hidden;
+            padding: 42px 36px;
+            background:
+                linear-gradient(145deg, rgba(88,28,135,.46), rgba(36,18,58,.84)),
+                radial-gradient(circle at 15% 20%, rgba(168,85,247,.35), transparent 38%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .login-info-card::after {
+            content:"";
+            position:absolute;
+            right:-80px;
+            bottom:-80px;
+            width:240px;
+            height:240px;
+            border-radius:50%;
+            background:rgba(168,85,247,.18);
+            filter: blur(2px);
+        }
+        .login-brand-row {
+            display:flex;
+            align-items:center;
+            gap:18px;
+            margin-bottom:20px;
+            position: relative;
+            z-index:1;
+        }
+        .login-logo-mark {
+            width:54px;
+            height:54px;
+            border-radius:17px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-size:27px;
+            background:linear-gradient(135deg,#a855f7,#38bdf8);
+            box-shadow:0 12px 30px rgba(168,85,247,.35);
+        }
+        .login-info-card h1 {
+            margin:0;
+            font-size:42px;
+            line-height:1.04;
+            letter-spacing:-.04em;
+            font-weight:1000;
+        }
+        .login-info-subtitle {
+            position: relative;
+            z-index:1;
+            color:#e9d5ff;
+            font-size:15px;
+            line-height:1.8;
+            max-width:430px;
+            margin: 0 0 28px;
+        }
+        .login-feature-list {
+            position: relative;
+            z-index:1;
+            display:grid;
+            gap:12px;
+            margin-top: 8px;
+        }
+        .login-feature {
+            display:grid;
+            grid-template-columns:32px 1fr;
+            gap:14px;
+            align-items:start;
+            padding:15px 16px;
+            border-radius:18px;
+            background:rgba(255,255,255,.055);
+            border:1px solid rgba(255,255,255,.08);
+        }
+        .login-feature b { display:block; font-size:15px; margin-bottom:4px; }
+        .login-feature span { color:#d8b4fe; font-size:13px; line-height:1.45; }
+        .password-card {
+            width: auto;
+            max-width: none;
+            min-width: 0;
+            padding: 44px 34px;
+            text-align: left;
+            background: rgba(24,18,35,.86);
+            display:flex;
+            flex-direction:column;
+            justify-content:center;
+        }
+        .password-card h1 {
+            font-size: 26px;
+            margin: 0 0 8px;
+            color: #ffffff;
+            text-transform: none;
+            letter-spacing: -.02em;
+        }
+        .password-card .login-caption {
+            color:#c4b5fd;
+            font-size:14px;
+            line-height:1.55;
+            margin-bottom: 24px;
+        }
+        .password-card label {
+            display:block;
+            color:#ddd6fe;
+            font-size:13px;
+            font-weight:800;
+            margin-bottom:8px;
+        }
+        .password-card input {
+            width: 100%;
+            margin-top: 0;
+            padding: 16px 17px;
+            border-radius: 16px;
+            border: 1px solid rgba(148,163,184,.30);
+            background: #eaf5ff;
+            color: #0f172a;
+            font-size: 16px;
+            outline: none;
+            text-align: left;
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,.36);
+        }
+        .password-card input:focus {
+            border-color:#a855f7;
+            box-shadow:0 0 0 4px rgba(168,85,247,.20);
+        }
+        .password-card button {
+            width: 100%;
+            margin-top: 14px;
+            padding: 16px 18px;
+            border-radius: 16px;
+            border: 0;
+            background: linear-gradient(135deg, #a855f7, #38bdf8);
+            color: #fff;
+            font-weight: 1000;
+            font-size: 16px;
+            cursor: pointer;
+            box-shadow:0 18px 36px rgba(168,85,247,.25);
+            transition: transform .15s ease, filter .15s ease;
+        }
+        .password-card button:hover { transform: translateY(-1px); filter: brightness(1.05); }
+        .login-small-note {
+            margin-top: 16px;
+            color:#8b7ca6;
+            font-size:12px;
+            line-height:1.5;
+            text-align:center;
+        }
+        .access-blocked {
+            width:min(920px, calc(100vw - 32px));
+            min-height:min(420px, calc(100vh - 32px));
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            border-radius:28px;
+            background:rgba(24,18,35,.88);
+            border:1px solid rgba(239,68,68,.40);
+            box-shadow:0 28px 100px rgba(0,0,0,.42);
+            font-size: clamp(28px, 7vw, 64px);
+            font-weight: 1000;
+            color: #ef4444;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+            max-width: calc(100vw - 32px);
+            padding: 24px;
+            word-break: break-word;
+        }
+        @media (max-width: 820px), (max-height: 620px) {
+            #password-overlay { padding: 16px; align-items: flex-start; }
+            .login-shell {
+                width: min(520px, calc(100vw - 24px));
+                min-height: 0;
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+            .login-info-card { padding: 26px 22px; }
+            .login-info-card h1 { font-size: 31px; }
+            .login-info-subtitle { font-size: 13px; margin-bottom: 16px; }
+            .login-feature-list { display:none; }
+            .password-card {
+                width: 100%;
+                max-height: none;
+                overflow: visible;
+                padding: 24px 20px;
+                border-radius: 22px;
+            }
+            .password-card h1 { font-size: 22px; }
+            .access-blocked {
+                font-size: clamp(24px, 8vw, 52px);
+                min-height: min(320px, calc(100vh - 32px));
+            }
+        }
+
+
+        .password-card {
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+        .password-card input,
+        .password-card button {
+            box-sizing: border-box;
+            max-width: 100%;
+            min-width: 0;
+            display: block;
+        }
+
+
+
+
+        .github-setup-note {
+            margin-top: 10px;
+            font-size: 11px;
+            line-height: 1.35;
+            color: rgba(248,250,252,.54);
+            text-align: center;
+        }
+
+        .login-auth-error {
+            min-height: 20px;
+            margin-top: 10px;
+            color: #fecaca;
+            font-size: 13px;
+            font-weight: 700;
+            text-align: center;
+        }
+        .password-card .login-secondary-action {
+            margin-top: 10px;
+            background: rgba(255,255,255,.08);
+            color: #f8fafc;
+            border: 1px solid rgba(167,139,250,.30);
+        }
+        .password-card .login-secondary-action:hover {
+            background: rgba(167,139,250,.18);
+        }
+
+        /* APP REDESIGN */
+        body {
+            background:
+                radial-gradient(circle at 8% 6%, rgba(56,189,248,.13), transparent 26%),
+                radial-gradient(circle at 88% 10%, rgba(168,85,247,.11), transparent 30%),
+                linear-gradient(135deg, #0b1120 0%, #111827 42%, #0f172a 100%);
+        }
+
+        header {
+            height: 74px;
+            background: rgba(15,23,42,.92);
+            border-bottom: 1px solid rgba(56,189,248,.34);
+            box-shadow: 0 18px 60px rgba(0,0,0,.28);
+            backdrop-filter: blur(14px);
+        }
+
+        .logo {
+            padding: 10px 14px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, rgba(56,189,248,.16), rgba(168,85,247,.12));
+            border: 1px solid rgba(148,163,184,.20);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,.06);
+        }
+
+        .settings-bar {
+            background: rgba(2,6,23,.30);
+            border: 1px solid rgba(148,163,184,.16);
+            border-radius: 18px;
+            padding: 10px 14px;
+        }
+
+        .settings-bar input,
+        .settings-bar select,
+        .tool-select-small {
+            border-radius: 12px;
+            border-color: rgba(148,163,184,.25);
+            background: rgba(2,6,23,.64);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
+        }
+
+        .toolbar,
+        .sidebar {
+            background:
+                linear-gradient(180deg, rgba(30,41,59,.94), rgba(15,23,42,.97));
+            border-color: rgba(148,163,184,.18);
+            box-shadow: 18px 0 70px rgba(0,0,0,.22);
+        }
+
+        .toolbar {
+            padding: 18px 16px;
+            gap: 9px;
+        }
+
+        .sidebar {
+            padding: 22px;
+            box-shadow: -18px 0 70px rgba(0,0,0,.20);
+        }
+
+        .tool-group-label {
+            color: #7dd3fc;
+            border-bottom: 1px solid rgba(125,211,252,.18);
+            letter-spacing: .06em;
+            margin-top: 15px;
+        }
+
+        .tool-btn,
+        .danger-btn,
+        .primary-btn,
+        .secondary-btn {
+            border-radius: 13px;
+            border-color: rgba(148,163,184,.22);
+            background: rgba(2,6,23,.54);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 8px 22px rgba(0,0,0,.14);
+        }
+
+        .tool-btn:hover,
+        .secondary-btn:hover {
+            background: rgba(30,41,59,.80);
+            border-color: rgba(56,189,248,.65);
+            transform: translateY(-1px);
+        }
+
+        .tool-btn.active {
+            background: linear-gradient(135deg, #38bdf8, #8b5cf6);
+            color: #fff;
+            border-color: transparent;
+            box-shadow: 0 14px 28px rgba(56,189,248,.20);
+        }
+
+        .primary-btn {
+            background: linear-gradient(135deg, #38bdf8, #8b5cf6);
+            color: #fff;
+            border: 0;
+        }
+
+        .danger-btn {
+            background: rgba(127,29,29,.38);
+            border-color: rgba(248,113,113,.35);
+        }
+
+        .workspace {
+            margin: 14px;
+            border-radius: 22px;
+            border: 1px solid rgba(148,163,184,.30);
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,.55), 0 22px 90px rgba(0,0,0,.28);
+            overflow: auto;
+        }
+
+        .platform-rect {
+            border-radius: 4px;
+            box-shadow: 0 6px 18px rgba(15,23,42,.08);
+        }
+
+        .platform-rect.selected {
+            box-shadow: 0 0 0 4px rgba(56,189,248,.20), 0 8px 22px rgba(15,23,42,.10);
+        }
+
+        .calc-table,
+        .legend-box {
+            background: rgba(2,6,23,.34);
+            border: 1px solid rgba(148,163,184,.18);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .calc-table th,
+        .calc-table td {
+            padding-left: 12px;
+            padding-right: 12px;
+        }
+
+        .legend-box {
+            padding: 16px;
+        }
+
+        .app-footer {
+            background: rgba(15,23,42,.95);
+            border-top: 1px solid rgba(56,189,248,.18);
+        }
+
+        .logout-btn {
+            margin-left: auto;
+            border: 1px solid rgba(248,113,113,.35);
+            background: rgba(127,29,29,.34);
+            color: #fecaca;
+            border-radius: 14px;
+            padding: 10px 14px;
+            font-weight: 900;
+            cursor: pointer;
+            transition: .18s ease;
+        }
+        .logout-btn:hover {
+            background: rgba(185,28,28,.52);
+            border-color: rgba(248,113,113,.70);
+            transform: translateY(-1px);
+        }
+
+        /* PRINT MEDIA */
+        #print-area { display: none; }
+
+        @media print {
+            @page { size: A4 portrait; margin: 6mm; }
+            * { box-sizing: border-box; }
+            header, .toolbar, .sidebar, .app-footer, .modal-3d, #password-overlay { display: none !important; }
+            body, html {
+                background: white !important;
+                overflow: visible;
+                height: auto;
+                margin: 0 !important;
+                padding: 0 !important;
+                font-family: 'Inter', Arial, sans-serif;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            #print-area {
+                display: block !important;
+                color: black;
+                width: 100%;
+                max-width: 100%;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            .print-main-page {
+                width: 100%;
+                height: auto;
+                min-height: 0;
+                padding: 0;
+                margin: 0;
+                background: #fff;
+                page-break-after: auto !important;
+                break-after: auto !important;
+            }
+            .print-header {
+                display: grid;
+                grid-template-columns: 1fr 110px;
+                gap: 8px;
+                border-bottom: 2px solid #000;
+                padding-bottom: 4px;
+                margin-bottom: 5px;
+                page-break-inside: avoid;
+            }
+            .print-header-title {
+                font-size: 10.5px;
+                font-weight: 900;
+                text-transform: uppercase;
+                letter-spacing: 0.2px;
+                line-height: 1.15;
+            }
+            .print-views-table {
+                width: 100%;
+                border-collapse: collapse;
+                table-layout: fixed;
+                margin-top: 3px;
+                margin-bottom: 5px;
+                page-break-inside: avoid;
+            }
+            .print-views-table td {
+                border: 1.1px solid #000;
+                padding: 3px;
+                vertical-align: top;
+                background: #fff;
+            }
+            .print-cell-title {
+                font-size: 7.5px;
+                line-height: 1;
+                font-weight: 900;
+                text-transform: uppercase;
+                margin-bottom: 2px;
+            }
+            .scheme-print-box {
+                width: 100%;
+                height: 205px;
+                position: relative;
+                overflow: hidden;
+                background: white;
+                box-sizing: border-box;
+            }
+            .print-3d-cell {
+                width: 100%;
+                height: 112px;
+                position: relative;
+                overflow: hidden;
+                background: #f8fafc;
+            }
+            .print-3d-cell img {
+                width: 100%;
+                height: 100%;
+                object-fit: contain;
+                display: block;
+                background: #f8fafc;
+            }
+            .print-3d-placeholder {
+                height: 100%;
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                font-size: 8px;
+                color:#475569;
+                text-align:center;
+                padding: 8px;
+            }
+            .print-table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-top: 5px;
+                font-size: 7px;
+                page-break-inside: auto;
+                table-layout: fixed;
+            }
+            .print-table thead { display: table-header-group; }
+            .print-table tfoot { display: table-row-group; }
+            .print-table th {
+                background: #e5e7eb !important;
+                font-weight: 900;
+                text-align: center;
+            }
+            .print-table th, .print-table td {
+                border: 1px solid #000;
+                padding: 2px 3px;
+                vertical-align: middle;
+                overflow-wrap: anywhere;
+            }
+            .print-table td:nth-child(1),
+            .print-table td:nth-child(3),
+            .print-table td:nth-child(4),
+            .print-table td:nth-child(5) {
+                font-family: 'JetBrains Mono', monospace;
+                text-align: center;
+            }
+            .print-footer {
+                margin-top: 5px;
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+                font-size: 7.5px;
+                font-weight: 700;
+                page-break-inside: avoid;
+            }
+            .print-author-mark {
+                text-align: right;
+                font-size: 6px;
+                color: #666;
+                margin-top: 4px;
+                font-family: 'JetBrains Mono', monospace;
+            }
+            .print-big3d-page { display: none !important; }
+        }
+    </style>
+</head>
+<body>
+<div id="password-overlay">
+    <div class="login-shell">
+        <section class="login-info-card">
+            <div class="login-brand-row">
+                <div class="login-logo-mark">▣</div>
+                <h1>AL-PODIUM<br>Engineering</h1>
+            </div>
+            <p class="login-info-subtitle">
+                Доступ через Supabase: пользователь входит по email/паролю и подтверждает общий код доступа.
+            </p>
+            <div class="login-feature-list">
+                <div class="login-feature"><b>1</b><div><b>Общий код</b><span>Код хранится на стороне Supabase и может быть изменён владельцем.</span></div></div>
+                <div class="login-feature"><b>2</b><div><b>Пользователи</b><span>Регистрация через email/пароль; пользователей можно удалять в Supabase Auth.</span></div></div>
+                <div class="login-feature"><b>3</b><div><b>Без пароля в HTML</b><span>В файле нет общего кода и нет его хэша — проверка идёт через RPC.</span></div></div>
+            </div>
+        </section>
+        <section class="password-card">
+            <h1>Вход в приложение</h1>
+            <div class="login-caption">Введите email, пароль и общий код доступа.</div>
+
+            <label for="auth-email">Email</label>
+            <input id="auth-email" type="email" autocomplete="email" placeholder="name@example.com">
+
+            <label for="auth-password">Пароль</label>
+            <input id="auth-password" type="password" autocomplete="current-password" placeholder="Пароль">
+
+            <label for="auth-code">Общий код доступа</label>
+            <input id="auth-code" type="password" autocomplete="off" placeholder="Общий код">
+
+            <div id="auth-error" class="login-auth-error" aria-live="polite"></div>
+
+            <button onclick="loginWithSupabase()">Войти</button>
+            <button class="login-secondary-action" onclick="registerWithSupabase()">Создать пользователя</button>
+            <div class="login-small-note">Для GitHub Pages: вставь SUPABASE_URL и SUPABASE_ANON_KEY в код файла index.html.</div>
+        </section>
+    </div>
+</div>
+<header>
+    <div class="logo"><b>AL-PODIUM</b> <span>IMLIGHT</span></div>
+    
+    <div class="settings-bar">
+        <label>Модель:</label>
+        <select id="model-select" onchange="updateAll()">
+            <option value="PP90">ПЛ90 (12мм - 500кг/м²)</option>
+            <option value="PP110">ПЛ110 (18мм - 750кг/м²)</option>
+        </select>
+        
+        <label style="margin-left: 10px;">Высота (м):</label>
+        <input type="number" id="h-input" value="0.8" step="0.2" min="0.2" max="2.0" oninput="updateAll()">
+        
+        <label class="doubt-toggle" style="margin-left: 15px;" title="Форсированное усиление: 2 соединителя на любой стык">
+            <input type="checkbox" id="doubt-toggle" onchange="updateAll()">
+            <span>"Есть сомнения"</span>
+        </label>
+        
+        <label class="doubt-toggle" style="margin-left: 15px;" title="Показать или скрыть пунктирную линию периметра">
+            <input type="checkbox" id="perim-toggle" checked onchange="updateAll()">
+            <span>Пунктир</span>
+        </label>
+    </div>
+
+    <div class="project-info-panel">
+        <input type="text" id="user-fio" placeholder="ФИО Менеджера..." oninput="updateAll()">
+        <input type="text" id="project-name" placeholder="Заказчик / Объект..." oninput="updateAll()">
+        <button class="btn-print" onclick="preparePrintAndPrint()">🖨 Печать PDF</button>
+    </div>
+</header>
+
+<div class="main-content">
+    <div class="toolbar">
+        <div class="tool-group-label">Управление</div>
+        <button class="tool-btn active" id="btn-view" onclick="setViewMode(this)">🖱 Просмотр</button>
+
+        <div class="tool-group-label">Платформы</div>
+        <div class="tool-row">
+            <button class="tool-btn" onclick="setTool(2, 1, '2x1', this)">2×1</button>
+            <button class="tool-btn" onclick="setTool(1, 1, '1x1', this)">1×1</button>
+            <button class="tool-btn" onclick="setTool(2, 0.5, '2x0.5', this)">2×0.5</button>
+            <button class="tool-btn" onclick="setTool(1, 0.5, '1x0.5', this)">1×0.5</button>
+        </div>
+
+        <div class="tool-group-label">Перила</div>
+        <select class="tool-select-small" id="rail-type-select" onchange="setRailPreset(this.value)">
+            <option value="ППл-Ал-2000|КР|2|3.9|Кр.ППл">ППл-Ал-2000|КР — алюминий, с торца, 2 м</option>
+            <option value="ППл-Ал-1000|КР|1|2.8|Кр.ППл">ППл-Ал-1000|КР — алюминий, с торца, 1 м</option>
+            <option value="ППл-Ал-2000|КР-В|2|4.0|Кр.В.ППл.20">ППл-Ал-2000|КР-В — над платформой, 2 м</option>
+            <option value="ППл-Ал-1000|КР-В|1|2.9|Кр.В.ППл.20">ППл-Ал-1000|КР-В — над платформой, 1 м</option>
+            <option value="ППл-Ал-2000|3КР-ВЗ(d28)|2|10.6|Кр.ППл">ППл-Ал-2000|3КР-ВЗ(d28) — вертикальное заполнение, 2 м</option>
+            <option value="ППл-Ал-1000|2КР-ВЗ(d28)|1|6.4|Кр.ППл">ППл-Ал-1000|2КР-ВЗ(d28) — вертикальное заполнение, 1 м</option>
+            <option value="ППл-Ст-2000|КР|2|13.7|Кр.ППл">ППл-Ст-2000|КР — сталь, 2 м</option>
+            <option value="ППл-Ст-1000|КР|1|8.8|Кр.ППл">ППл-Ст-1000|КР — сталь, 1 м</option>
+        </select>
+        <div class="tool-row" style="margin-top:8px;">
+            <button class="tool-btn" onclick="setRailTool(this)">▥ Поставить</button>
+            <button class="tool-btn" onclick="autoRailingsSafe(this)">▥ Авто</button>
+        </div>
+
+        <div class="tool-group-label">Лестницы</div>
+        <select class="tool-select-small" id="stair-type-select" onchange="setStairPreset(this.value)">
+            <option value="auto">Авто по высоте подиума</option>
+            <option value="ЛПС1000-0,4|0,6|3|0.4|0.6|36.6|1.100">ЛПС1000-0,4|0,6 — 3 ступени</option>
+            <option value="ЛПС1000-0,5|0,8|4|0.5|0.8|45.9|1.414">ЛПС1000-0,5|0,8 — 4 ступени</option>
+            <option value="ЛПС1000-0,6|1,0|5|0.6|1.0|54.7|1.726">ЛПС1000-0,6|1,0 — 5 ступеней</option>
+            <option value="ЛПС1000-0,8|1,2|6|0.8|1.2|66.2|2.000">ЛПС1000-0,8|1,2 — 6 ступеней</option>
+            <option value="ЛПС1000-1,0|1,4|7|1.0|1.4|77.8|2.269">ЛПС1000-1,0|1,4 — 7 ступеней</option>
+            <option value="ЛПС1000-1,2|1,6|8|1.2|1.6|88.5|2.537">ЛПС1000-1,2|1,6 — 8 ступеней</option>
+            <option value="ЛПС1000-1,4|1,8|9|1.4|1.8|97.7|2.800">ЛПС1000-1,4|1,8 — 9 ступеней</option>
+            <option value="ЛПС1000-1,6|2,0|10|1.6|2.0|109.2|3.068">ЛПС1000-1,6|2,0 — 10 ступеней</option>
+        </select>
+        <button class="tool-btn" style="margin-top:8px;" onclick="setStairTool(this)">▤ Поставить лестницу</button>
+
+        <div class="tool-group-label">Усиления</div>
+        <div class="tool-row">
+            <button class="tool-btn" onclick="setDiagonalTool(this)">╳ Диагональ</button>
+            <button class="tool-btn" onclick="setFrameTool(this)">▣ Ферма</button>
+        </div>
+        <div class="tool-row" style="margin-top:8px;">
+            <button class="tool-btn" onclick="autoDiagonals()">Авто-диаг.</button>
+            <button class="tool-btn" onclick="autoFrames()">Авто-фермы</button>
+        </div>
+        <input type="checkbox" id="auto-reinf-toggle" style="display:none">
+
+        <div class="tool-group-label">Общие действия</div>
+        <div class="tool-row">
+            <button class="tool-btn" onclick="rotateTool()">🔄 R</button>
+            <button class="tool-btn" onclick="setDeleteAccessoryMode(this)">✖ Удалить</button>
+        </div>
+        <div class="tool-row" style="margin-top:8px;">
+            <button class="tool-btn" onclick="undoAction()">↶ Отмена</button>
+            <button class="tool-btn btn-3d" onclick="show3D()">🧊 3D</button>
+        </div>
+
+        <div class="tool-group-label">Проект</div>
+        <div class="tool-row">
+            <button class="tool-btn" onclick="saveProject()">💾 Файл</button>
+            <button class="tool-btn" onclick="document.getElementById('project-file-input').click()">📂 Открыть</button>
+        </div>
+        <input type="file" id="project-file-input" accept=".json,.alpodium.json,.html" style="display:none" onchange="loadProjectFile(event)">
+
+        <div class="tool-group-label">Навигация</div>
+        <div class="tool-row">
+            <button class="tool-btn" onclick="btnZoomIn()">🔍 +</button>
+            <button class="tool-btn" onclick="btnZoomOut()">🔍 −</button>
+        </div>
+
+        <button class="tool-btn" style="margin-top:10px;color:var(--danger); border-color: rgba(239, 68, 68, 0.3);" onclick="clearAll()">🗑 Очистить всё</button>
+
+        <div style="margin-top: auto; font-size: 0.65rem; color: #64748b; line-height: 1.5; padding: 10px 0;">
+            <b style="color:var(--text);">Горячие клавиши:</b><br>
+            <b>Esc</b> — просмотр<br>
+            <b>R</b> — поворот выбранного/режима<br>
+            <b>Del</b> — удалить выбранное
+        </div>
+    </div>
+
+    <div class="workspace" id="canvas-area" tabindex="0">
+        <div id="viewport">
+            <div id="ghost" class="ghost"></div>
+            <div id="accessory-ghost" class="accessory-ghost"></div>
+            <div id="platforms-layer"></div>
+            <div id="perimeter-layer"></div>
+            <div id="supports-layer"></div>
+            <div id="accessories-layer"></div>
+            <div class="rail-ghost-note" id="tool-note"></div>
+        </div>
+    </div>
+
+    <div class="sidebar">
+        <h3 style="margin:0 0 15px 0; color:var(--accent); font-size: 1.1rem; text-transform: uppercase;">Спецификация</h3>
+        
+        <table class="calc-table">
+            <thead>
+                <tr>
+                    <th>Артикул / Наименование</th>
+                    <th class="num-col" style="text-align: center;">Кол.</th>
+                    <th class="num-col">Вес</th>
+                </tr>
+            </thead>
+            <tbody id="spec-body"></tbody>
+        </table>
+
+        <div class="legend-box">
+            <div class="legend-item">
+                <div class="legend-icon-wrap" id="leg-clamp-2"></div>
+                <span>СОп60 (2 шт.) - Усиление / Высокий</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-icon-wrap" id="leg-clamp-1"></div>
+                <span>СОп60 (1 шт.) - Периферия / Средний</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-icon-wrap" id="leg-conn"></div>
+                <span>СП-01-АБ (Соединитель профиля)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-icon-wrap" id="leg-ins"></div>
+                <span>ГВПв (Вставка выравнивающая)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-icon-wrap"><div style="width:32px;height:5px;background:#0f172a;border:1px solid #38bdf8"></div></div>
+                <span>Перила / ограждение</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-icon-wrap" id="leg-rail-bracket"></div>
+                <span>Кронштейн / струбцина крепления перил</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-icon-wrap" id="leg-rail-joiner"></div>
+                <span>Соединитель между секциями перил</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-icon-wrap"><div style="width:28px;height:18px;border:2px solid #b45309;background:#fef3c7"></div></div>
+                <span>Простая лестница / проход</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-icon-wrap"><span style="color:#111;font-weight:900;">X</span></div>
+                <span>Диагонали при h ≥ 1.3 м</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="app-footer">
+    <div class="stats">
+        Платформ: <span id="f-platforms">0</span>
+        Опор (Ног): <span id="f-legs">0</span>
+        Стыков: <span id="f-joints">0</span>
+        Итоговый вес: <span id="f-weight" style="color: var(--accent);">0.0 кг</span>
+    </div>
+    <div class="author">Created by Arkhangelskiy</div>
+</footer>
+
+
+<!-- 3D VIEWER -->
+<div class="modal-3d" id="modal3d" onclick="if(event.target.id==='modal3d') close3D()">
+    <div class="viewer3d-box">
+        <div class="viewer3d-head">
+            <div><b>3D просмотр</b> — схема подиума, перил, лестниц и усилений</div>
+            <button class="viewer3d-close" onclick="close3D()">× Закрыть</button>
+        </div>
+        <div class="viewer3d-toolbar">
+            <button onclick="set3DView('iso')">Изометрия</button>
+            <button onclick="set3DView('front')">Спереди</button>
+            <button onclick="set3DView('side')">Сбоку</button>
+            <button onclick="set3DView('top')">Сверху</button>
+            <button onclick="set3DView('reset')">Сброс</button>
+            <button onclick="save3DImage()">💾 Сохранить изображение</button>
+            <button onclick="set3DEditMode('orbit')" id="btn-3d-orbit">Вращать</button>
+            <button onclick="set3DEditMode('diagonal')" id="btn-3d-diagonal">+ Диагональ</button>
+            <button onclick="set3DEditMode('frame')" id="btn-3d-frame">+ Ферма</button>
+            <button onclick="set3DEditMode('delete')" id="btn-3d-delete">Удалить</button>
+            <div class="hint" id="hint-3d-edit">Вращение: ЛКМ · Масштаб: колесо · ПКМ/Shift: панорама</div>
+        </div>
+        <div id="viewer3d"></div>
+        <div class="viewer3d-note">3D-режим: просмотр конструкции и ручное редактирование только диагоналей/ферм. Платформы, перила и лестницы ставятся в 2D.</div>
+    </div>
+</div>
+
+<!-- PRINT TEMPLATE -->
+<div id="print-area">
+    <div class="print-main-page">
+    <div class="print-header">
+        <div>
+            <div class="print-header-title">ТЕХНИЧЕСКИЙ ОТЧЕТ ПО РАСЧЕТУ ПОДИУМА AL-PODIUM IMLIGHT</div>
+            <div id="p-project-title" style="margin-top: 5px; font-size: 14px;">Объект: ---</div>
+        </div>
+        <div style="text-align: right;">
+            <div id="p-date"></div>
+        </div>
+    </div>
+    
+    <table class="print-views-table">
+        <tr>
+            <td colspan="2">
+                <div class="print-cell-title">2D-чертёж / план подиума</div>
+                <div class="scheme-print-box" id="print-scheme"></div>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <div class="print-cell-title">3D / изометрия</div>
+                <div class="print-3d-cell" id="p-3d-iso"><div class="print-3d-placeholder">3D будет подготовлено перед печатью</div></div>
+            </td>
+            <td>
+                <div class="print-cell-title">3D / вид спереди</div>
+                <div class="print-3d-cell" id="p-3d-front"><div class="print-3d-placeholder">3D будет подготовлено перед печатью</div></div>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <div class="print-cell-title">3D / вид сбоку</div>
+                <div class="print-3d-cell" id="p-3d-side"><div class="print-3d-placeholder">3D будет подготовлено перед печатью</div></div>
+            </td>
+            <td>
+                <div class="print-cell-title">3D / вид сверху</div>
+                <div class="print-3d-cell" id="p-3d-top"><div class="print-3d-placeholder">3D будет подготовлено перед печатью</div></div>
+            </td>
+        </tr>
+    </table>
+
+
+    <table class="print-table">
+        <thead>
+            <tr>
+                <th style="width: 7%;">№</th>
+                <th style="width: 53%;">Артикул / Наименование</th>
+                <th style="width: 14%;">Кол-во</th>
+                <th style="width: 11%; text-align: center;">Ед.</th>
+                <th style="width: 15%;">Вес (кг)</th>
+            </tr>
+        </thead>
+        <tbody id="p-spec"></tbody>
+        <tfoot>
+            <tr style="font-weight: bold; background: #f1f5f9;">
+                <td colspan="4" style="text-align: right; padding-right: 15px;">ОБЩИЙ ВЕС КОНСТРУКЦИИ:</td>
+                <td id="p-total-weight" style="text-align: center; font-family: 'JetBrains Mono', monospace;"></td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <div class="print-footer">
+        <div>Составил: <span id="p-fio" style="border-bottom: 1px solid #000; min-width: 200px; display: inline-block;"></span></div>
+        <div>Заказчик: <span id="p-customer" style="border-bottom: 1px solid #000; min-width: 200px; display: inline-block;"></span></div>
+    </div>
+    <div class="print-author-mark">Created by Arkhangelskiy</div>
+
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+
+
+
+    // === SUPABASE AUTH SETTINGS ===
+    // 1) Создайте проект Supabase.
+    // 2) Вставьте сюда Project URL и anon/public key из Project Settings > API.
+    // 3) Выполните SQL из файла al_podium_supabase_setup.sql.
+    const SUPABASE_URL = 'PASTE_SUPABASE_URL_HERE'; // сюда вставишь Project URL из Supabase
+    const SUPABASE_ANON_KEY = 'PASTE_SUPABASE_ANON_KEY_HERE'; // сюда вставишь anon/public key из Supabase
+    let supabaseClient = null;
+
+    function isSupabaseConfigured() {
+        return SUPABASE_URL && SUPABASE_ANON_KEY
+            && !SUPABASE_URL.includes('PASTE_')
+            && !SUPABASE_ANON_KEY.includes('PASTE_');
+    }
+
+    function getSupabaseClient() {
+        if(!isSupabaseConfigured()) {
+            throw new Error('Supabase не настроен: вставьте SUPABASE_URL и SUPABASE_ANON_KEY в HTML-файл перед загрузкой на GitHub.');
+        }
+        if(!window.supabase || !window.supabase.createClient) {
+            throw new Error('Не загрузилась библиотека Supabase. Проверьте интернет/CDN.');
+        }
+        if(!supabaseClient) {
+            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        }
+        return supabaseClient;
+    }
+
+    function setAuthError(message='') {
+        const el = document.getElementById('auth-error');
+        if(el) el.textContent = message;
+    }
+
+    function renderSupabaseLogin() {
+        return `
+            <div class="login-shell">
+                <section class="login-info-card">
+                    <div class="login-brand-row">
+                        <div class="login-logo-mark">▣</div>
+                        <h1>AL-PODIUM<br>Engineering</h1>
+                    </div>
+                    <p class="login-info-subtitle">
+                        Доступ через Supabase: пользователь входит по email/паролю и подтверждает общий код доступа.
+                    </p>
+                    <div class="login-feature-list">
+                        <div class="login-feature"><b>1</b><div><b>Общий код</b><span>Код хранится на стороне Supabase и может быть изменён владельцем.</span></div></div>
+                        <div class="login-feature"><b>2</b><div><b>Пользователи</b><span>Регистрация через email/пароль; пользователей можно удалять в Supabase Auth.</span></div></div>
+                        <div class="login-feature"><b>3</b><div><b>Без пароля в HTML</b><span>В файле нет общего кода и нет его хэша — проверка идёт через RPC.</span></div></div>
+                    </div>
+                </section>
+                <section class="password-card">
+                    <h1>Вход в приложение</h1>
+                    <div class="login-caption">Введите email, пароль и общий код доступа.</div>
+
+                    <label for="auth-email">Email</label>
+                    <input id="auth-email" type="email" autocomplete="email" placeholder="name@example.com">
+
+                    <label for="auth-password">Пароль</label>
+                    <input id="auth-password" type="password" autocomplete="current-password" placeholder="Пароль">
+
+                    <label for="auth-code">Общий код доступа</label>
+                    <input id="auth-code" type="password" autocomplete="off" placeholder="Общий код">
+
+                    <div id="auth-error" class="login-auth-error" aria-live="polite"></div>
+
+                    <button onclick="loginWithSupabase()">Войти</button>
+                    <button class="login-secondary-action" onclick="registerWithSupabase()">Создать пользователя</button>
+                    <div class="login-small-note">Если вы владелец: код меняется в таблице Supabase, пользователи удаляются в Authentication → Users.</div><div class="github-setup-note">Для публикации на GitHub Pages переименуй файл в index.html.</div>
+                </section>
+            </div>
+        `;
+    }
+
+    function getAuthInputs() {
+        const email = (document.getElementById('auth-email')?.value || '').trim();
+        const password = document.getElementById('auth-password')?.value || '';
+        const code = document.getElementById('auth-code')?.value || '';
+        return { email, password, code };
+    }
+
+    async function verifyCommonCode(code) {
+        if(!code) return false;
+        const sb = getSupabaseClient();
+        const { data, error } = await sb.rpc('verify_access_code', { p_code: code });
+        if(error) throw error;
+        return data === true;
+    }
+
+    async function loginWithSupabase() {
+        try {
+            setAuthError('');
+            const { email, password, code } = getAuthInputs();
+            if(!email || !password || !code) {
+                setAuthError('Заполните email, пароль и общий код.');
+                return;
+            }
+
+            const okCode = await verifyCommonCode(code);
+            if(!okCode) {
+                document.getElementById('password-overlay').innerHTML = '<div class="access-blocked">ДОСТУП ЗАБЛОКИРОВАН</div>';
+                return;
+            }
+
+            const sb = getSupabaseClient();
+            const { error } = await sb.auth.signInWithPassword({ email, password });
+            if(error) throw error;
+
+            const overlay = document.getElementById('password-overlay');
+            if(overlay) overlay.style.display = 'none';
+        } catch(err) {
+            setAuthError(err.message || 'Не удалось войти.');
+        }
+    }
+
+    async function registerWithSupabase() {
+        try {
+            setAuthError('');
+            const { email, password, code } = getAuthInputs();
+            if(!email || !password || !code) {
+                setAuthError('Заполните email, пароль и общий код.');
+                return;
+            }
+            if(password.length < 6) {
+                setAuthError('Пароль пользователя должен быть минимум 6 символов.');
+                return;
+            }
+
+            const okCode = await verifyCommonCode(code);
+            if(!okCode) {
+                document.getElementById('password-overlay').innerHTML = '<div class="access-blocked">ДОСТУП ЗАБЛОКИРОВАН</div>';
+                return;
+            }
+
+            const sb = getSupabaseClient();
+            const { error } = await sb.auth.signUp({ email, password });
+            if(error) throw error;
+
+            setAuthError('Пользователь создан. Если в Supabase включено подтверждение email — подтвердите письмо, затем войдите.');
+        } catch(err) {
+            setAuthError(err.message || 'Не удалось зарегистрироваться.');
+        }
+    }
+
+    async function logoutApp() {
+        try {
+            if(isSupabaseConfigured()) {
+                await getSupabaseClient().auth.signOut();
+            }
+        } catch(err) {
+            console.warn(err);
+        }
+        const overlay = document.getElementById('password-overlay');
+        if(overlay) {
+            overlay.style.display = 'flex';
+            overlay.innerHTML = renderSupabaseLogin();
+            const email = document.getElementById('auth-email');
+            if(email) email.focus();
+            attachAuthEnterHandlers();
+        }
+    }
+
+    function attachAuthEnterHandlers() {
+        ['auth-email','auth-password','auth-code'].forEach(id => {
+            const el = document.getElementById(id);
+            if(el) el.addEventListener('keydown', e => {
+                if(e.key === 'Enter') loginWithSupabase();
+            });
+        });
+    }
+
+    async function initPasswordGate() {
+        const overlay = document.getElementById('password-overlay');
+        if(!overlay) return;
+
+        if(!isSupabaseConfigured()) {
+            overlay.style.display = 'flex';
+            setTimeout(() => setAuthError('Supabase не настроен: вставьте SUPABASE_URL и SUPABASE_ANON_KEY.'), 50);
+            attachAuthEnterHandlers();
+            return;
+        }
+
+        try {
+            const sb = getSupabaseClient();
+            const { data } = await sb.auth.getSession();
+            if(data && data.session) {
+                overlay.style.display = 'none';
+            } else {
+                overlay.style.display = 'flex';
+                attachAuthEnterHandlers();
+            }
+
+            sb.auth.onAuthStateChange((_event, session) => {
+                const currentOverlay = document.getElementById('password-overlay');
+                if(currentOverlay) currentOverlay.style.display = session ? 'none' : 'flex';
+            });
+        } catch(err) {
+            overlay.style.display = 'flex';
+            setAuthError(err.message || 'Ошибка подключения Supabase.');
+            attachAuthEnterHandlers();
+        }
+    }
+    window.addEventListener('DOMContentLoaded', initPasswordGate);
+
+    const GRID = 80; 
+    let platforms = [];
+    let railings = [];
+    let stairs = [];
+    let manualNoRailEdges = [];
+    let reinforcements = [];
+    let undoStack = [];
+    let selectedAccessory = null;
+    let railToolLen = 2;
+    let railToolArticle = 'ППл-Ал-2000|КР';
+    let railToolWeight = 3.9;
+    let railBracketArticle = 'Кр.ППл';
+    let stairPlacementSide = 'auto';
+    let stairToolMode = 'auto';
+    let stairToolPreset = null;
+    let selectedIdx = -1;
+    let currentTool = { w: 2, h: 1, id: '2x1' };
+    let currentScale = 1;
+    let isDrawingMode = false;
+    let accessoryMode = 'none'; // none | rail | stair | diagonal | frame | delete
+
+    // Весовые коэффициенты: платформы/базовая фурнитура из старого ТЗ.
+    // Для новых элементов вес оставлен 0, чтобы не врать: заполните по актуальному каталогу/прайсу.
+    const WEIGHTS = {
+        PP90: { "2x1": 31.0, "1x1": 19.5, "2x0.5": 21.0, "1x0.5": 13.0 },
+        PP110: { "2x1": 46.0, "1x1": 26.5, "2x0.5": 28.0, "1x0.5": 17.5 },
+        COMP: { connector: 0.40, insert: 0.15, clamp: 0.65, leg: 2.80, rail1: 0, rail2: 0, railClamp: 0, stair: 0, diagonal: 0, frame: 0 }
+    };
+
+    const STAIR_PRESETS = [
+        { article:'ЛПС1000-0,4|0,6', steps:3, min:0.4, max:0.6, weight:36.6, depth:1.100 },
+        { article:'ЛПС1000-0,5|0,8', steps:4, min:0.5, max:0.8, weight:45.9, depth:1.414 },
+        { article:'ЛПС1000-0,6|1,0', steps:5, min:0.6, max:1.0, weight:54.7, depth:1.726 },
+        { article:'ЛПС1000-0,8|1,2', steps:6, min:0.8, max:1.2, weight:66.2, depth:2.000 },
+        { article:'ЛПС1000-1,0|1,4', steps:7, min:1.0, max:1.4, weight:77.8, depth:2.269 },
+        { article:'ЛПС1000-1,2|1,6', steps:8, min:1.2, max:1.6, weight:88.5, depth:2.537 },
+        { article:'ЛПС1000-1,4|1,8', steps:9, min:1.4, max:1.8, weight:97.7, depth:2.800 },
+        { article:'ЛПС1000-1,6|2,0', steps:10, min:1.6, max:2.0, weight:109.2, depth:3.068 }
+    ];
+
+    const SVG_CLAMP_2 = `<svg viewBox="0 0 24 14" width="28" height="14">
+        <rect x="0" y="2" width="10" height="10" fill="none" stroke="black" stroke-width="2"/>
+        <line x1="0" y1="2" x2="10" y2="12" stroke="red" stroke-width="2"/>
+        <line x1="10" y1="2" x2="0" y2="12" stroke="red" stroke-width="2"/>
+        <rect x="14" y="2" width="10" height="10" fill="none" stroke="black" stroke-width="2"/>
+        <line x1="14" y1="2" x2="24" y2="12" stroke="red" stroke-width="2"/>
+        <line x1="24" y1="2" x2="14" y2="12" stroke="red" stroke-width="2"/>
+    </svg>`;
+    const SVG_CLAMP_1 = `<svg viewBox="0 0 14 14" width="14" height="14">
+        <rect x="2" y="2" width="10" height="10" fill="none" stroke="black" stroke-width="2"/>
+        <line x1="2" y1="2" x2="12" y2="12" stroke="red" stroke-width="2"/>
+        <line x1="12" y1="2" x2="2" y2="12" stroke="red" stroke-width="2"/>
+    </svg>`;
+    const SVG_CONN = `<svg viewBox="0 0 20 12" width="20" height="12"><path d="M2,2 L2,10 L18,10 L18,2" fill="none" stroke="#2563eb" stroke-width="3"/></svg>`;
+    const SVG_INS = `<svg viewBox="0 0 16 6" width="16" height="6"><rect x="0" y="0" width="16" height="6" fill="#10b981"/></svg>`;
+    const SVG_RAIL_BRACKET = `<svg viewBox="0 0 16 16" width="16" height="16">
+        <rect x="3" y="3" width="10" height="10" rx="1" fill="#fff" stroke="#0f172a" stroke-width="2"/>
+        <circle cx="8" cy="8" r="2" fill="#f97316"/>
+    </svg>`;
+    const SVG_RAIL_JOINER = `<svg viewBox="0 0 18 18" width="18" height="18">
+        <rect x="3" y="7" width="12" height="4" rx="1" fill="#facc15" stroke="#713f12" stroke-width="1.5"/>
+        <circle cx="5" cy="9" r="1.2" fill="#713f12"/><circle cx="13" cy="9" r="1.2" fill="#713f12"/>
+    </svg>`;
+    const SVG_RAIL_CORNER = `<svg viewBox="0 0 18 18" width="18" height="18">
+        <path d="M4 14 L4 5 L13 5" fill="none" stroke="#facc15" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M4 14 L4 5 L13 5" fill="none" stroke="#713f12" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>`;
+
+    document.getElementById('leg-clamp-2').innerHTML = SVG_CLAMP_2;
+    document.getElementById('leg-clamp-1').innerHTML = SVG_CLAMP_1;
+    document.getElementById('leg-conn').innerHTML = SVG_CONN;
+    document.getElementById('leg-ins').innerHTML = SVG_INS;
+    if(document.getElementById('leg-rail-bracket')) document.getElementById('leg-rail-bracket').innerHTML = SVG_RAIL_BRACKET;
+    if(document.getElementById('leg-rail-joiner')) document.getElementById('leg-rail-joiner').innerHTML = SVG_RAIL_JOINER;
+
+    const canvasArea = document.getElementById('canvas-area');
+    const viewport = document.getElementById('viewport');
+    const ghost = document.getElementById('ghost');
+    const accessoryGhost = document.getElementById('accessory-ghost');
+    const toolNote = document.getElementById('tool-note');
+
+    window.addEventListener('load', () => {
+        canvasArea.scrollLeft = 2500 - canvasArea.clientWidth / 2;
+        canvasArea.scrollTop = 2500 - canvasArea.clientHeight / 2;
+        ghost.style.display = 'none';
+        accessoryGhost.style.display = 'none';
+        updateGhost();
+        setStairPreset(document.getElementById('stair-type-select')?.value || 'auto');
+        updateAutoReinfLabel();
+        updateAll();
+    });
+
+    function changeZoom(delta) {
+        currentScale = Math.max(0.4, Math.min(2.5, currentScale + delta));
+        viewport.style.transform = `scale(${currentScale})`;
+    }
+    function btnZoomIn() { changeZoom(0.2); }
+    function btnZoomOut() { changeZoom(-0.2); }
+
+    canvasArea.addEventListener('wheel', (e) => {
+        if(e.ctrlKey) { e.preventDefault(); changeZoom(e.deltaY > 0 ? -0.1 : 0.1); }
+    }, {passive: false});
+
+    function setActiveButton(btn) {
+        document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+        if(btn) btn.classList.add('active');
+    }
+
+    const TOOL_LABELS = {
+        view: 'Просмотр / выделение',
+        delete: 'Удалить перило / лестницу',
+        p_2x1: 'Платформа 2.0 × 1.0',
+        p_1x1: 'Платформа 1.0 × 1.0',
+        p_2x05: 'Платформа 2.0 × 0.5',
+        p_1x05: 'Платформа 1.0 × 0.5',
+        rail: 'Перило вручную',
+        stair: 'Простая лестница',
+        auto_rails: 'Авто-перила',
+        auto_reinf_toggle: 'Авто-диагонали / фермы'
+    };
+
+    function toggleToolDropdown() {
+        const dd = document.getElementById('tool-dropdown');
+        if(dd) dd.classList.toggle('open');
+    }
+
+    function toggleToolSection(id) {
+        const section = document.getElementById(id);
+        if(section) section.classList.toggle('open');
+    }
+
+    function markToolActive(value) {
+        document.querySelectorAll('[data-tool-item]').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.toolItem === value);
+        });
+        const label = document.getElementById('tool-current-label');
+        if(label && TOOL_LABELS[value]) label.innerText = TOOL_LABELS[value];
+    }
+
+    function chooseTool(value) {
+        markToolActive(value);
+        const fakeBtn = null;
+
+        if(value === 'view') return setViewMode(document.getElementById('btn-view'));
+        if(value === 'delete') return setDeleteAccessoryMode(fakeBtn);
+        if(value === 'p_2x1') return setTool(2, 1, '2x1', fakeBtn);
+        if(value === 'p_1x1') return setTool(1, 1, '1x1', fakeBtn);
+        if(value === 'p_2x05') return setTool(2, 0.5, '2x0.5', fakeBtn);
+        if(value === 'p_1x05') return setTool(1, 0.5, '1x0.5', fakeBtn);
+        if(value === 'rail') return setRailTool(fakeBtn);
+        if(value === 'stair') return setStairTool(fakeBtn);
+        if(value === 'auto_rails') {
+            autoRailingsSafe(null);
+            markToolActive('auto_rails');
+            return;
+        }
+    }
+
+    function updateAutoReinfLabel() {
+        const toggle = document.getElementById('auto-reinf-toggle');
+        const label = document.getElementById('auto-reinf-menu-label');
+        if(label) label.innerText = (toggle && toggle.checked)
+            ? '☑ Авто-диагонали / фермы'
+            : '☐ Авто-диагонали / фермы';
+    }
+
+    function toggleAutoReinfFromMenu() {
+        const toggle = document.getElementById('auto-reinf-toggle');
+        if(!toggle) return;
+        toggle.checked = !toggle.checked;
+        updateAutoReinfLabel();
+        markToolActive('auto_reinf_toggle');
+        updateAll();
+    }
+
+    function syncToolPicker(value) {
+        markToolActive(value);
+    }
+
+    function applyToolPicker(value) {
+        chooseTool(value);
+    }
+
+    function syncToolPicker(value) {
+        const picker = document.getElementById('tool-picker');
+        if(picker && picker.value !== value) picker.value = value;
+    }
+
+    function applyToolPicker(value) {
+        const fakeBtn = null;
+        if(value === 'view') return setViewMode(document.getElementById('btn-view'));
+        if(value === 'p_2x1') return setTool(2, 1, '2x1', fakeBtn);
+        if(value === 'p_1x1') return setTool(1, 1, '1x1', fakeBtn);
+        if(value === 'p_2x05') return setTool(2, 0.5, '2x0.5', fakeBtn);
+        if(value === 'p_1x05') return setTool(1, 0.5, '1x0.5', fakeBtn);
+        if(value === 'rail') return setRailTool(fakeBtn);
+        if(value === 'stair') return setStairTool(fakeBtn);
+        if(value === 'delete') return setDeleteAccessoryMode(fakeBtn);
+    }
+
+    function setViewMode(btn) {
+        isDrawingMode = false;
+        accessoryMode = 'none';
+        setActiveButton(btn || document.getElementById('btn-view'));
+        ghost.style.display = 'none';
+        accessoryGhost.style.display = 'none';
+        showToolNote('');
+    }
+
+    function setTool(w, h, id, btn) {
+        isDrawingMode = true;
+        accessoryMode = 'none';
+        ghost.style.display = 'block';
+        accessoryGhost.style.display = 'none';
+        currentTool = { w, h, id };
+        setActiveButton(btn);
+        showToolNote('Кликните по полю, чтобы поставить платформу. R — повернуть.');
+        updateGhost();
+    }
+
+    function setRailTool(btn) {
+        isDrawingMode = false;
+        accessoryMode = 'rail';
+        ghost.style.display = 'none';
+        accessoryGhost.style.display = 'block';
+        accessoryGhost.className = 'accessory-ghost rail';
+        setActiveButton(btn);
+        showToolNote(`Кликните по внешнему краю, чтобы поставить перило ${railToolLen} м.`);
+    }
+
+    function setStairTool(btn) {
+        isDrawingMode = false;
+        accessoryMode = 'stair';
+        ghost.style.display = 'none';
+        accessoryGhost.style.display = 'block';
+        accessoryGhost.className = 'accessory-ghost stair';
+        setActiveButton(btn);
+        showToolNote('Кликните по внешнему краю подиума, чтобы поставить простую лестницу и сделать проход в перилах.');
+    }
+
+    function setDiagonalTool(btn) {
+        isDrawingMode = false;
+        accessoryMode = 'diagonal';
+        ghost.style.display = 'none';
+        accessoryGhost.style.display = 'block';
+        accessoryGhost.className = 'accessory-ghost diagonal';
+        setActiveButton(btn);
+        showToolNote('Кликните по пролёту 2 м между опорами, чтобы поставить диагональ.');
+    }
+
+    function setFrameTool(btn) {
+        isDrawingMode = false;
+        accessoryMode = 'frame';
+        ghost.style.display = 'none';
+        accessoryGhost.style.display = 'block';
+        accessoryGhost.className = 'accessory-ghost frame';
+        setActiveButton(btn);
+        showToolNote('Кликните по пролёту 2 м между опорами, чтобы поставить ферму.');
+    }
+
+    function setDeleteAccessoryMode(btn) {
+        isDrawingMode = false;
+        accessoryMode = 'delete';
+        ghost.style.display = 'none';
+        accessoryGhost.style.display = 'none';
+        setActiveButton(btn);
+        showToolNote('Кликните по перилу или лестнице, чтобы удалить элемент.');
+    }
+
+    function showToolNote(text) {
+        if(!toolNote) return;
+        toolNote.innerText = text;
+        toolNote.style.display = text ? 'block' : 'none';
+    }
+
+    function setRailPreset(value) {
+        const parts = String(value || '').split('|');
+        railToolArticle = parts[0] && parts[1] ? `${parts[0]}|${parts[1]}` : 'ППл-Ал-2000|КР';
+        railToolLen = parseFloat(parts[2] || '2');
+        railToolWeight = parseFloat(parts[3] || '0');
+        railBracketArticle = parts[4] || 'Кр.ППл';
+    }
+
+    function parseStairPresetValue(value) {
+        if(value === 'auto') return null;
+        const p = String(value || '').split('|');
+        return {
+            article: `${p[0]}|${p[1]}`,
+            steps: parseInt(p[2] || '0', 10),
+            min: parseFloat(p[3] || '0'),
+            max: parseFloat(p[4] || '0'),
+            weight: parseFloat(p[5] || '0'),
+            depth: parseFloat(p[6] || '0.9')
+        };
+    }
+
+    function setStairPreset(value) {
+        stairToolMode = value === 'auto' ? 'auto' : 'manual';
+        stairToolPreset = parseStairPresetValue(value);
+    }
+
+    function getSelectedStairPreset() {
+        if(stairToolMode === 'manual' && stairToolPreset) return stairToolPreset;
+        const h = parseFloat(document.getElementById('h-input').value) || 0.8;
+        return STAIR_PRESETS.find(s => h >= s.min - 0.001 && h <= s.max + 0.001)
+            || STAIR_PRESETS.reduce((best, s) => {
+                const d = h < s.min ? s.min - h : h > s.max ? h - s.max : 0;
+                const bd = best ? (h < best.min ? best.min - h : h > best.max ? h - best.max : 0) : Infinity;
+                return d < bd ? s : best;
+            }, null);
+    }
+
+    function getProjectState() {
+        return {
+            platforms: JSON.parse(JSON.stringify(platforms)),
+            railings: JSON.parse(JSON.stringify(railings)),
+            stairs: JSON.parse(JSON.stringify(stairs)),
+            manualNoRailEdges: JSON.parse(JSON.stringify(manualNoRailEdges)),
+            reinforcements: JSON.parse(JSON.stringify(reinforcements)),
+            model: document.getElementById('model-select')?.value || 'PP90',
+            height: document.getElementById('h-input')?.value || '0.8',
+            doubt: !!document.getElementById('doubt-toggle')?.checked,
+            manager: document.getElementById('user-fio')?.value || '',
+            project: document.getElementById('project-name')?.value || '',
+            stairPreset: document.getElementById('stair-type-select')?.value || 'auto'
+        };
+    }
+
+    function applyProjectState(state) {
+        platforms = state.platforms || [];
+        railings = state.railings || [];
+        stairs = state.stairs || [];
+        manualNoRailEdges = state.manualNoRailEdges || [];
+        reinforcements = state.reinforcements || [];
+        if(document.getElementById('model-select')) document.getElementById('model-select').value = state.model || 'PP90';
+        if(document.getElementById('h-input')) document.getElementById('h-input').value = state.height || '0.8';
+        if(document.getElementById('doubt-toggle')) document.getElementById('doubt-toggle').checked = !!state.doubt;
+        if(document.getElementById('user-fio')) document.getElementById('user-fio').value = state.manager || '';
+        if(document.getElementById('project-name')) document.getElementById('project-name').value = state.project || '';
+        if(document.getElementById('stair-type-select')) { document.getElementById('stair-type-select').value = state.stairPreset || 'auto'; setStairPreset(state.stairPreset || 'auto'); }
+        selectedIdx = -1;
+        selectedAccessory = null;
+        updateAll();
+    }
+
+    function pushUndo() {
+        undoStack.push(getProjectState());
+        if(undoStack.length > 60) undoStack.shift();
+    }
+
+    function undoAction() {
+        const prev = undoStack.pop();
+        if(!prev) { showToolNote('Нет действий для отмены.'); return; }
+        applyProjectState(prev);
+        showToolNote('Действие отменено.');
+    }
+
+    function saveProject() {
+        const data = getProjectState();
+        data.version = 'AL-PODIUM-2026-APP';
+        const name = (document.getElementById('project-name')?.value || 'al-podium-project').replace(/[\/:*?\"<>|]+/g,'_');
+        downloadBlobFile(JSON.stringify(data, null, 2), name + '.alpodium.json', 'application/json;charset=utf-8');
+        showToolNote('Проект сохранён файлом .alpodium.json.');
+    }
+
+    function saveProjectToBrowser() {
+        const data = getProjectState();
+        data.version = 'AL-PODIUM-2026-APP';
+        localStorage.setItem('al_podium_last_project', JSON.stringify(data));
+        showToolNote('Проект сохранён в браузере.');
+    }
+
+    function loadProjectFromBrowser() {
+        const raw = localStorage.getItem('al_podium_last_project');
+        if(!raw) { alert('В браузере пока нет сохранённого проекта.'); return; }
+        try {
+            pushUndo();
+            applyProjectState(JSON.parse(raw));
+            showToolNote('Проект загружен из браузера.');
+        } catch(err) {
+            alert('Не удалось загрузить проект из браузера: ' + err.message);
+        }
+    }
+
+
+    async function downloadBlobFile(content, filename, type='application/octet-stream') {
+        // В Chrome/Edge сохраняет как нормальный файл через окно выбора места.
+        if(window.showSaveFilePicker) {
+            try {
+                const handle = await window.showSaveFilePicker({
+                    suggestedName: filename,
+                    types: [{ description: 'AL-PODIUM project', accept: { [type.split(';')[0] || 'application/octet-stream']: ['.' + filename.split('.').pop()] } }]
+                });
+                const writable = await handle.createWritable();
+                await writable.write(new Blob([content], {type}));
+                await writable.close();
+                return;
+            } catch(err) {
+                if(err && err.name === 'AbortError') return;
+                console.warn('showSaveFilePicker failed, fallback download:', err);
+            }
+        }
+
+        const blob = new Blob([content], {type});
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = filename;
+        a.style.display = 'none';
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 300);
+    }
+
+    function exportEditableHtml() {
+        const state = getProjectState();
+        state.version = 'AL-PODIUM-2026-APP';
+        let html = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+        html = html.replace(/<script id="embedded-project-data" type="application\/json">[\s\S]*?<\/script>/g, '');
+        const json = JSON.stringify(state).replace(/</g, '\\u003c');
+        html = html.replace('</body>', `<script id="embedded-project-data" type="application/json">${json}<\/script>\n</body>`);
+        const name = (document.getElementById('project-name')?.value || 'al-podium-editable').replace(/[\\/:*?"<>|]+/g,'_');
+        downloadBlobFile(html, name + '.html', 'text/html;charset=utf-8');
+    }
+
+    function loadProjectFile(event) {
+        const file = event.target.files && event.target.files[0];
+        if(!file) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+            try {
+                pushUndo();
+                let raw = String(reader.result || '');
+                let data;
+                if(file.name.toLowerCase().endsWith('.html')) {
+                    const m = raw.match(/<script id="embedded-project-data" type="application\/json">([\s\S]*?)<\/script>/);
+                    if(!m) throw new Error('В HTML-файле не найден встроенный проект.');
+                    data = JSON.parse(m[1]);
+                } else {
+                    data = JSON.parse(raw);
+                }
+                applyProjectState(data);
+                showToolNote('Проект загружен.');
+            } catch(err) {
+                alert('Не удалось открыть проект: ' + err.message);
+            }
+        };
+        reader.readAsText(file);
+        event.target.value = '';
+    }
+
+    function loadEmbeddedProjectIfAny() {
+        const el = document.getElementById('embedded-project-data');
+        if(!el) return;
+        try {
+            const state = JSON.parse(el.textContent || '{}');
+            setTimeout(() => applyProjectState(state), 80);
+        } catch(err) {
+            console.warn('Не удалось загрузить встроенный проект:', err);
+        }
+    }
+
+    window.addEventListener('load', loadEmbeddedProjectIfAny);
+
+    function rotateTool() {
+        if (isDrawingMode) {
+            [currentTool.w, currentTool.h] = [currentTool.h, currentTool.w];
+            updateGhost();
+            return;
+        }
+
+        if(['stair','diagonal','frame'].includes(accessoryMode)) {
+            stairPlacementSide = stairPlacementSide === 'auto' ? 'top' :
+                stairPlacementSide === 'top' ? 'right' :
+                stairPlacementSide === 'right' ? 'bottom' :
+                stairPlacementSide === 'bottom' ? 'left' : 'auto';
+            showToolNote(`Ориентация режима: ${stairPlacementSide}`);
+            return;
+        }
+
+        if(selectedAccessory) {
+            pushUndo();
+            if(selectedAccessory.kind === 'stair') {
+                const st = stairs[selectedAccessory.idx];
+                if(st) {
+                    st.orient = st.orient === 'H' ? 'V' : 'H';
+                    st.side = st.orient === 'H' ? 'bottom' : 'right';
+                    const mid = (st.start + st.end) / 2;
+                    st.start = mid - 0.5;
+                    st.end = mid + 0.5;
+                }
+            }
+            if(selectedAccessory.kind === 'reinforcement') {
+                const r = reinforcements[selectedAccessory.idx];
+                if(r) {
+                    r.orient = r.orient === 'H' ? 'V' : 'H';
+                    r.side = r.orient === 'H' ? 'bottom' : 'right';
+                }
+            }
+            updateAll();
+            return;
+        }
+    }
+
+    function updateGhost() {
+        ghost.style.width = (currentTool.w * GRID) + 'px';
+        ghost.style.height = (currentTool.h * GRID) + 'px';
+    }
+
+    function getCoords(e) {
+        const pt = getMouseMeter(e);
+        let unSnappedX = pt.x - currentTool.w/2;
+        let unSnappedY = pt.y - currentTool.h/2;
+        let cx = Math.round(unSnappedX * 2) / 2;
+        let cy = Math.round(unSnappedY * 2) / 2;
+        const snapDist = 0.4;
+        let finalX = cx, finalY = cy;
+        let minDx = snapDist, minDy = snapDist;
+
+        platforms.forEach(p => {
+            [p.x - currentTool.w, p.x + p.w, p.x, p.x + p.w - currentTool.w].forEach(tgt => {
+                let d = Math.abs(unSnappedX - tgt);
+                if (d < minDx) { minDx = d; finalX = tgt; }
+            });
+            [p.y - currentTool.h, p.y + p.h, p.y, p.y + p.h - currentTool.h].forEach(tgt => {
+                let d = Math.abs(unSnappedY - tgt);
+                if (d < minDy) { minDy = d; finalY = tgt; }
+            });
+        });
+        return { x: finalX, y: finalY };
+    }
+
+    function getMouseMeter(e) {
+        const vpRect = viewport.getBoundingClientRect();
+        const rawX = (e.clientX - vpRect.left) / currentScale;
+        const rawY = (e.clientY - vpRect.top) / currentScale;
+        return { x: (rawX - 2500) / GRID, y: (rawY - 2500) / GRID };
+    }
+
+    function isOverlapping(coords) {
+        return platforms.some(p => !(coords.x + currentTool.w <= p.x || coords.x >= p.x + p.w || coords.y + currentTool.h <= p.y || coords.y >= p.y + p.h));
+    }
+
+    canvasArea.addEventListener('mousemove', (e) => {
+        if (isDrawingMode) {
+            const coords = getCoords(e);
+            ghost.style.left = (coords.x * GRID + 2500 + (currentTool.w * GRID)/2) + 'px';
+            ghost.style.top = (coords.y * GRID + 2500 + (currentTool.h * GRID)/2) + 'px';
+            if(isOverlapping(coords)) ghost.classList.add('invalid');
+            else ghost.classList.remove('invalid');
+            return;
+        }
+        if (['rail','stair','diagonal','frame'].includes(accessoryMode)) updateAccessoryGhost(e);
+    });
+    canvasArea.addEventListener('mouseleave', () => {
+        if(!isDrawingMode) accessoryGhost.style.display = 'none';
+    });
+
+    canvasArea.addEventListener('mousedown', (e) => {
+        if(e.target.classList.contains('platform-rect')) {
+            selectedIdx = parseInt(e.target.dataset.idx);
+            updateAll();
+            e.stopPropagation();
+            return;
+        }
+
+        if(e.target.dataset && e.target.dataset.kind) {
+            selectedAccessory = {kind: e.target.dataset.kind, idx: parseInt(e.target.dataset.idx)};
+            if(accessoryMode === 'delete') {
+                deleteAccessoryByDataset(e.target.dataset.kind, parseInt(e.target.dataset.idx));
+                e.stopPropagation();
+                return;
+            }
+        }
+
+        if(accessoryMode === 'rail') {
+            addManualRail(e);
+            e.stopPropagation();
+            return;
+        }
+        if(accessoryMode === 'stair') {
+            addSimpleStair(e);
+            e.stopPropagation();
+            return;
+        }
+        if(accessoryMode === 'diagonal' || accessoryMode === 'frame') {
+            addManualReinforcement(e, accessoryMode);
+            e.stopPropagation();
+            return;
+        }
+        if(accessoryMode === 'delete') {
+            deleteNearestAccessory(e);
+            e.stopPropagation();
+            return;
+        }
+
+        selectedIdx = -1;
+        if (!isDrawingMode) { updateAll(); return; }
+
+        const coords = getCoords(e);
+        if(!isOverlapping(coords)) {
+            pushUndo();
+            platforms.push({...coords, w: currentTool.w, h: currentTool.h, id: currentTool.id});
+            updateAll();
+        } else updateAll();
+    });
+
+    window.addEventListener('keydown', (e) => {
+        if(document.activeElement.tagName === 'INPUT') return;
+        if(e.code === 'Escape') { setViewMode(document.getElementById('btn-view')); markToolActive('view'); }
+        if(e.code === 'KeyR' || e.code === 'KeyK' || String(e.key).toLowerCase() === 'r' || String(e.key).toLowerCase() === 'к') rotateTool();
+        if((e.code === 'Delete' || e.code === 'Backspace') && selectedIdx !== -1) {
+            pushUndo();
+            platforms.splice(selectedIdx, 1);
+            selectedIdx = -1;
+            railings = []; stairs = []; reinforcements = []; manualNoRailEdges = [];
+            updateAll();
+        } else if((e.code === 'Delete' || e.code === 'Backspace') && selectedAccessory) {
+            deleteAccessoryByDataset(selectedAccessory.kind, selectedAccessory.idx);
+        }
+    });
+
+    function clearAll() { 
+        if(confirm("Вы уверены, что хотите очистить весь проект?")) {
+            pushUndo(); platforms = []; railings = []; stairs = []; reinforcements = []; manualNoRailEdges = []; selectedIdx = -1; selectedAccessory = null; updateAll(); 
+            setViewMode(document.getElementById('btn-view'));
+        }
+    }
+
+    function drawSVG(layer, cx, cy, svgString, rotate = false, offset = {x:0, y:0}) {
+        const el = document.createElement('div');
+        el.className = 'marker';
+        el.style.left = (cx * GRID + 2500 + offset.x) + 'px';
+        el.style.top = (cy * GRID + 2500 + offset.y) + 'px';
+        el.innerHTML = svgString;
+        let transform = `translate(-50%, -50%)`;
+        if(rotate) transform += ` rotate(90deg)`;
+        el.style.transform = transform;
+        layer.appendChild(el);
+    }
+
+    // ---------- Геометрия внешнего периметра ----------
+    function edgeKey(orient, fixed, start) { return `${orient}|${fixed.toFixed(3)}|${start.toFixed(3)}`; }
+
+    function getExternalHalfEdges() {
+        const map = {};
+        function add(orient, side, fixed, start, end) {
+            const k = edgeKey(orient, fixed, start);
+            if(!map[k]) map[k] = { orient, side, fixed, start, end, count:0 };
+            map[k].count++;
+        }
+        platforms.forEach(p => {
+            for(let x=p.x; x<p.x+p.w-0.001; x+=0.5) {
+                add('H', 'top', p.y, x, x+0.5);
+                add('H', 'bottom', p.y+p.h, x, x+0.5);
+            }
+            for(let y=p.y; y<p.y+p.h-0.001; y+=0.5) {
+                add('V', 'left', p.x, y, y+0.5);
+                add('V', 'right', p.x+p.w, y, y+0.5);
+            }
+        });
+        return Object.values(map).filter(e => e.count === 1);
+    }
+
+    function getExternalRuns() {
+        const groups = {};
+        getExternalHalfEdges().forEach(e => {
+            const k = `${e.orient}|${e.side}|${e.fixed}`;
+            if(!groups[k]) groups[k] = [];
+            groups[k].push(e);
+        });
+        const runs = [];
+        Object.values(groups).forEach(list => {
+            list.sort((a,b)=>a.start-b.start);
+            let cur = null;
+            list.forEach(e => {
+                if(!cur) cur = {...e};
+                else if(Math.abs(cur.end - e.start) < 0.001) cur.end = e.end;
+                else { runs.push({...cur, len: cur.end-cur.start}); cur = {...e}; }
+            });
+            if(cur) runs.push({...cur, len: cur.end-cur.start});
+        });
+        return runs;
+    }
+
+    function nearestExternalRun(pt, maxDist=0.35) {
+        let best = null;
+        getExternalRuns().forEach(r => {
+            let d, along;
+            if(r.orient === 'H') {
+                along = Math.max(r.start, Math.min(r.end, pt.x));
+                d = Math.hypot(pt.x - along, pt.y - r.fixed);
+            } else {
+                along = Math.max(r.start, Math.min(r.end, pt.y));
+                d = Math.hypot(pt.x - r.fixed, pt.y - along);
+            }
+            if(d <= maxDist && (!best || d < best.d)) best = { ...r, d, along };
+        });
+        return best;
+    }
+
+    function normalizedSegment(seg) {
+        return `${seg.orient}|${seg.side}|${seg.fixed.toFixed(3)}|${seg.start.toFixed(3)}|${seg.end.toFixed(3)}`;
+    }
+
+    function segmentOverlaps(a, b) {
+        if(a.orient !== b.orient || a.side !== b.side || Math.abs(a.fixed-b.fixed)>0.001) return false;
+        return Math.max(a.start, b.start) < Math.min(a.end, b.end) - 0.001;
+    }
+
+    function autoRailingsSafe(btn) {
+        try {
+            if(btn) setActiveButton(btn);
+            autoRailings();
+        } catch (err) {
+            console.error('Ошибка автоперил:', err);
+            alert('Не удалось поставить автоперила: ' + (err && err.message ? err.message : err));
+        }
+    }
+
+    function autoRailings() {
+        if(platforms.length === 0) { alert('Сначала поставьте платформы.'); return; }
+
+        // Сбрасываем режим рисования, чтобы автоперила не конфликтовали с фантомом платформы/лестницы.
+        isDrawingMode = false;
+        accessoryMode = 'none';
+        if(ghost) ghost.style.display = 'none';
+        if(accessoryGhost) accessoryGhost.style.display = 'none';
+        selectedIdx = -1;
+
+        const externalRuns = getExternalRuns();
+        let runs = subtractStairOpenings(externalRuns);
+        runs = runs.filter(r => r.side !== 'bottom'); // перед сцены = низ схемы, без автоперил
+        runs = subtractManualNoRail(runs);
+        railings = [];
+
+        runs.forEach(r => {
+            let pos = r.start;
+            let remain = r.end - r.start;
+
+            // Сначала раскладываем полные перила 2 м.
+            while(remain >= 1.999) {
+                railings.push({...r, start:pos, end:pos+2, len:2, type:'ПП-А-2000', auto:true});
+                pos += 2;
+                remain -= 2;
+            }
+
+            // Потом 1 м.
+            while(remain >= 0.999) {
+                railings.push({...r, start:pos, end:pos+1, len:1, type:'ПП-А-1000', auto:true});
+                pos += 1;
+                remain -= 1;
+            }
+
+            // Остаток 0.5 м оставляем как нестандарт/проверка.
+            if(remain >= 0.49) {
+                railings.push({...r, start:pos, end:r.end, len:remain, type:'нестандарт 0.5м', auto:true, custom:true});
+            }
+        });
+
+        updateAll();
+
+        if(railings.length === 0) {
+            showToolNote('Авто-перила не поставлены: не найден внешний периметр или все участки заняты проходами/лестницами.');
+            alert('Авто-перила не поставлены: внешний периметр не найден или все участки заняты проходами.');
+        } else {
+            showToolNote(`Авто-перила поставлены: ${railings.length} участков. Участки под лестницы оставлены проходами.`);
+        }
+    }
+
+    function subtractStairOpenings(runs) {
+        let result = [];
+        runs.forEach(r => {
+            let pieces = [{...r}];
+    
+        stairs.forEach(st => {
+                pieces = pieces.flatMap(pc => {
+                    if(!segmentOverlaps(pc, st)) return [pc];
+                    const out = [];
+                    if(st.start - pc.start >= 0.49) out.push({...pc, end: st.start, len: st.start-pc.start});
+                    if(pc.end - st.end >= 0.49) out.push({...pc, start: st.end, len: pc.end-st.end});
+                    return out;
+                });
+            });
+            result.push(...pieces.map(x=>({...x, len:x.end-x.start})));
+        });
+        return result;
+    }
+
+
+    function getSupportNodesMap() {
+        const nodes = {};
+        platforms.forEach(p => [[p.x,p.y],[p.x+p.w,p.y],[p.x,p.y+p.h],[p.x+p.w,p.y+p.h]].forEach(n => {
+            nodes[n.join(',')] = {x:n[0], y:n[1]};
+        }));
+        return nodes;
+    }
+
+    function nearestSupportSpan(pt, maxDist=0.45) {
+        const nodeList = Object.values(getSupportNodesMap());
+        let best = null;
+
+        const rows = {};
+        nodeList.forEach(n => { const k = n.y.toFixed(3); (rows[k] ||= []).push(n.x); });
+        Object.entries(rows).forEach(([yk, xs]) => {
+            xs = [...new Set(xs)].sort((a,b)=>a-b);
+            for(let i=0;i<xs.length;i++) for(let j=i+1;j<xs.length;j++) {
+                const len = xs[j] - xs[i];
+                if(Math.abs(len - 2) > 0.01) continue;
+                const along = Math.max(xs[i], Math.min(xs[j], pt.x));
+                const d = Math.hypot(pt.x - along, pt.y - parseFloat(yk));
+                if(d < maxDist && (!best || d < best.d)) {
+                    const side = pt.y < parseFloat(yk) ? 'top' : 'bottom';
+                    best = {orient:'H', side, fixed:parseFloat(yk), start:xs[i], end:xs[j], len:2, d, along};
+                }
+            }
+        });
+
+        const cols = {};
+        nodeList.forEach(n => { const k = n.x.toFixed(3); (cols[k] ||= []).push(n.y); });
+        Object.entries(cols).forEach(([xk, ys]) => {
+            ys = [...new Set(ys)].sort((a,b)=>a-b);
+            for(let i=0;i<ys.length;i++) for(let j=i+1;j<ys.length;j++) {
+                const len = ys[j] - ys[i];
+                if(Math.abs(len - 2) > 0.01) continue;
+                const along = Math.max(ys[i], Math.min(ys[j], pt.y));
+                const d = Math.hypot(pt.x - parseFloat(xk), pt.y - along);
+                if(d < maxDist && (!best || d < best.d)) {
+                    const side = pt.x < parseFloat(xk) ? 'left' : 'right';
+                    best = {orient:'V', side, fixed:parseFloat(xk), start:ys[i], end:ys[j], len:2, d, along};
+                }
+            }
+        });
+        return best;
+    }
+
+    function getAccessoryCandidate(pt, kind) {
+        const r = (kind === 'diagonal' || kind === 'frame') ? nearestSupportSpan(pt) : nearestExternalRun(pt);
+        if(!r) return null;
+        const targetLen = (kind === 'rail') ? railToolLen : (kind === 'diagonal' || kind === 'frame' ? 2 : 1);
+        let start = Math.max(r.start, Math.min(r.end - targetLen, r.along - targetLen/2));
+        start = Math.round(start * 2) / 2;
+        let end = Math.min(r.end, start + targetLen);
+        if(end - start < targetLen - 0.01) start = Math.max(r.start, end - targetLen);
+        const type = kind === 'rail'
+            ? railToolArticle
+            : kind === 'diagonal' ? 'ДВ-Ап-2000'
+            : kind === 'frame' ? 'Ферма Оп60-В1000-2000'
+            : (getSelectedStairPreset()?.article || 'ЛПС1000');
+        return { ...r, start, end, len:end-start, type, weight: (kind === 'rail' ? railToolWeight : 0), bracket: railBracketArticle };
+    }
+
+    function paintAccessoryGhost(candidate, kind, invalid=false) {
+        if(!candidate) { accessoryGhost.style.display = 'none'; return; }
+        accessoryGhost.style.display = 'block';
+        accessoryGhost.className = `accessory-ghost ${kind}${invalid ? ' invalid' : ''}`;
+        const depth = (st.depth || getSelectedStairPreset()?.depth || 0.9) * GRID;
+        const offset = 7;
+
+        if(kind === 'rail') {
+            if(candidate.orient === 'H') {
+                accessoryGhost.style.left = (candidate.start*GRID + 2500) + 'px';
+                accessoryGhost.style.top = (candidate.fixed*GRID + 2500 + (candidate.side==='top' ? -offset : offset-6)) + 'px';
+                accessoryGhost.style.width = ((candidate.end-candidate.start)*GRID) + 'px';
+                accessoryGhost.style.height = '6px';
+            } else {
+                accessoryGhost.style.left = (candidate.fixed*GRID + 2500 + (candidate.side==='left' ? -offset : offset-6)) + 'px';
+                accessoryGhost.style.top = (candidate.start*GRID + 2500) + 'px';
+                accessoryGhost.style.width = '6px';
+                accessoryGhost.style.height = ((candidate.end-candidate.start)*GRID) + 'px';
+            }
+            return;
+        }
+
+        if(kind === 'diagonal' || kind === 'frame') {
+            const sideOffset = 28;
+            if(candidate.orient === 'H') {
+                accessoryGhost.style.left = (candidate.start*GRID + 2500) + 'px';
+                accessoryGhost.style.top = (candidate.fixed*GRID + 2500 + (candidate.side==='top' ? -sideOffset : 8)) + 'px';
+                accessoryGhost.style.width = ((candidate.end-candidate.start)*GRID) + 'px';
+                accessoryGhost.style.height = '26px';
+            } else {
+                accessoryGhost.style.left = (candidate.fixed*GRID + 2500 + (candidate.side==='left' ? -sideOffset : 8)) + 'px';
+                accessoryGhost.style.top = (candidate.start*GRID + 2500) + 'px';
+                accessoryGhost.style.width = '26px';
+                accessoryGhost.style.height = ((candidate.end-candidate.start)*GRID) + 'px';
+            }
+            return;
+        }
+
+        if(kind === 'stair') {
+            if(candidate.orient === 'H') {
+                accessoryGhost.style.width = ((candidate.end-candidate.start)*GRID)+'px';
+                accessoryGhost.style.height = depth+'px';
+                accessoryGhost.style.left = (candidate.start*GRID+2500)+'px';
+                accessoryGhost.style.top = (candidate.fixed*GRID+2500 + (candidate.side==='top' ? -depth : 0))+'px';
+                accessoryGhost.style.setProperty('--stair-stripes', '0deg');
+            } else {
+                accessoryGhost.style.width = depth+'px';
+                accessoryGhost.style.height = ((candidate.end-candidate.start)*GRID)+'px';
+                accessoryGhost.style.left = (candidate.fixed*GRID+2500 + (candidate.side==='left' ? -depth : 0))+'px';
+                accessoryGhost.style.top = (candidate.start*GRID+2500)+'px';
+                accessoryGhost.style.setProperty('--stair-stripes', '90deg');
+            }
+        }
+    }
+
+    function updateAccessoryGhost(e) {
+        const pt = getMouseMeter(e);
+        const kind = accessoryMode;
+        const candidate = getAccessoryCandidate(pt, kind);
+        if(!candidate) { accessoryGhost.style.display = 'none'; return; }
+        let invalid = false;
+        if(kind === 'rail') invalid = stairs.some(st => segmentOverlaps(candidate, st)) || railings.some(rr => segmentOverlaps(candidate, rr));
+        else if(kind === 'diagonal' || kind === 'frame') invalid = candidate.len < 1.99 || reinforcements.some(rr => segmentOverlaps(candidate, rr));
+        else invalid = stairs.some(st => segmentOverlaps(candidate, st));
+        paintAccessoryGhost(candidate, kind, invalid);
+    }
+
+    function addManualRail(e) {
+        const candidate = getAccessoryCandidate(getMouseMeter(e), 'rail');
+        if(!candidate) { showToolNote('Перило можно поставить только по внешнему краю подиума.'); return; }
+        candidate.auto = false;
+        candidate.type = railToolArticle;
+        candidate.weight = railToolWeight;
+        candidate.bracket = railBracketArticle;
+        if(candidate.len < 0.99) { showToolNote('Недостаточно места для выбранного перила.'); return; }
+        if(stairs.some(st => segmentOverlaps(candidate, st))) { showToolNote('Здесь стоит лестница/проход — перило не добавлено.'); return; }
+        if(railings.some(rr => segmentOverlaps(candidate, rr))) { showToolNote('На этом участке уже есть перило.'); return; }
+        pushUndo();
+        railings.push(candidate);
+        updateAll();
+    }
+
+    function addSimpleStair(e) {
+        const st = getAccessoryCandidate(getMouseMeter(e), 'stair');
+        if(!st) { showToolNote('Лестницу можно поставить только на внешний край подиума.'); return; }
+        if(stairs.some(s => segmentOverlaps(s, st))) { showToolNote('На этом участке уже стоит лестница.'); return; }
+        const preset = getSelectedStairPreset();
+        Object.assign(st, {
+            type: preset.article,
+            article: preset.article,
+            steps: preset.steps,
+            hMin: preset.min,
+            hMax: preset.max,
+            weight: preset.weight,
+            depth: preset.depth
+        });
+        pushUndo();
+        stairs.push(st);
+        railings = railings.filter(rr => !segmentOverlaps(rr, st));
+        updateAll();
+        showToolNote(`Лестница ${preset.article} (${preset.steps} ступ.) поставлена. Перило на этом участке удалено для прохода.`);
+    }
+
+    function deleteAccessoryByDataset(kind, idx) {
+        pushUndo();
+        if(kind === 'rail') {
+            const removed = railings[idx];
+            if(removed) manualNoRailEdges.push({...removed, manualNoRail:true});
+            railings.splice(idx,1);
+        }
+        if(kind === 'stair') stairs.splice(idx,1);
+        if(kind === 'reinforcement') reinforcements.splice(idx,1);
+        selectedAccessory = null;
+        updateAll();
+    }
+
+    function deleteNearestAccessory(e) {
+        const pt = getMouseMeter(e);
+        let best = null;
+        railings.forEach((r,idx)=>{
+            let d = r.orient==='H' ? Math.abs(pt.y-r.fixed) + (pt.x<r.start||pt.x>r.end ? 2:0) : Math.abs(pt.x-r.fixed)+(pt.y<r.start||pt.y>r.end ? 2:0);
+            if(!best || d<best.d) best={kind:'rail',idx,d};
+        });
+        stairs.forEach((s,idx)=>{
+            let d = s.orient==='H' ? Math.abs(pt.y-s.fixed) + (pt.x<s.start||pt.x>s.end ? 2:0) : Math.abs(pt.x-s.fixed)+(pt.y<s.start||pt.y>s.end ? 2:0);
+            if(!best || d<best.d) best={kind:'stair',idx,d};
+        });
+        if(best && best.d < 0.5) deleteAccessoryByDataset(best.kind, best.idx);
+        else showToolNote('Рядом нет перил или лестницы для удаления.');
+    }
+
+
+    function addManualReinforcement(e, kind) {
+        const candidate = getAccessoryCandidate(getMouseMeter(e), kind);
+        if(!candidate) { showToolNote('Усиление можно поставить только по внешней стороне.'); return; }
+        if(candidate.len < 1.99) { showToolNote('Для ДВ-Ап-2000/фермы нужен пролёт 2 м.'); return; }
+        if(reinforcements.some(rr => segmentOverlaps(candidate, rr))) { showToolNote('На этом участке уже есть усиление.'); return; }
+        pushUndo();
+        reinforcements.push({...candidate, kind});
+        updateAll();
+    }
+
+    function drawManualReinforcement(layer, r, idx) {
+        if(r.kind === 'frame') drawFrame(layer, r);
+        else drawDiagonal(layer, r);
+        // Невидимая зона клика поверх усиления для удаления/выделения
+        const hit = document.createElement('div');
+        hit.className = 'accessory-rail manual';
+        hit.dataset.kind = 'reinforcement';
+        if(selectedAccessory && selectedAccessory.kind==='reinforcement' && selectedAccessory.idx===idx) hit.classList.add('selected');
+        hit.title = `${r.type} (${r.kind === 'frame' ? 'ферма' : 'диагональ'})`;
+        hit.dataset.idx = idx;
+        hit.style.opacity = '0.01';
+        if(r.orient === 'H') {
+            hit.style.left = (r.start*GRID + 2500) + 'px';
+            hit.style.top = (r.fixed*GRID + 2500 + (r.side==='top' ? -45 : 8)) + 'px';
+            hit.style.width = ((r.end-r.start)*GRID) + 'px';
+            hit.style.height = '44px';
+        } else {
+            hit.style.left = (r.fixed*GRID + 2500 + (r.side==='left' ? -45 : 8)) + 'px';
+            hit.style.top = (r.start*GRID + 2500) + 'px';
+            hit.style.width = '44px';
+            hit.style.height = ((r.end-r.start)*GRID) + 'px';
+        }
+        layer.appendChild(hit);
+    }
+
+    function drawRail(layer, r, idx) {
+        const el = document.createElement('div');
+        el.className = 'accessory-rail' + (!r.auto ? ' manual' : '') + (selectedAccessory && selectedAccessory.kind==='rail' && selectedAccessory.idx===idx ? ' selected' : '');
+        el.dataset.kind = 'rail'; el.dataset.idx = idx;
+        const offset = 7;
+        if(r.orient === 'H') {
+            el.style.left = (r.start*GRID + 2500) + 'px';
+            el.style.top = (r.fixed*GRID + 2500 + (r.side==='top' ? -offset : offset-6)) + 'px';
+            el.style.width = ((r.end-r.start)*GRID) + 'px';
+            el.style.height = '6px';
+        } else {
+            el.style.left = (r.fixed*GRID + 2500 + (r.side==='left' ? -offset : offset-6)) + 'px';
+            el.style.top = (r.start*GRID + 2500) + 'px';
+            el.style.width = '6px';
+            el.style.height = ((r.end-r.start)*GRID) + 'px';
+        }
+        el.title = `${r.type} (${(r.end-r.start).toFixed(1)} м) · кронштейн: ${r.bracket || 'Кр.ППл'}`;
+        layer.appendChild(el);
+    }
+
+
+    function railEndpoint(r, which) {
+        if(r.orient === 'H') return {x: which === 'start' ? r.start : r.end, y: r.fixed};
+        return {x: r.fixed, y: which === 'start' ? r.start : r.end};
+    }
+
+    function railPointKey(pt) {
+        return `${pt.x.toFixed(3)},${pt.y.toFixed(3)}`;
+    }
+
+    function getRailHardwareSummary() {
+        const brackets = {};
+        const pointMap = {};
+        const steelStraightKeys = new Set();
+        const steelCornerKeys = new Set();
+        const aluminumUniversalKeys = new Set();
+
+        railings.forEach((r, idx) => {
+            const br = r.bracket || 'Кр.ППл';
+            brackets[br] = (brackets[br] || 0) + 2;
+
+            ['start','end'].forEach(endName => {
+                const pt = railEndpoint(r, endName);
+                const key = railPointKey(pt);
+                (pointMap[key] ||= []).push({idx, rail:r, endName, pt});
+            });
+        });
+
+        Object.entries(pointMap).forEach(([key, items]) => {
+            if(items.length < 2) return;
+            for(let i=0;i<items.length;i++) {
+                for(let j=i+1;j<items.length;j++) {
+                    const a = items[i].rail, b = items[j].rail;
+                    const steel = (String(a.type).includes('ППл-Ст') || String(b.type).includes('ППл-Ст'));
+                    const pairKey = `${key}|${Math.min(items[i].idx,items[j].idx)}|${Math.max(items[i].idx,items[j].idx)}`;
+                    if(!steel) {
+                        aluminumUniversalKeys.add(pairKey);
+                    } else if(a.orient === b.orient && Math.abs(a.fixed - b.fixed) < 0.001) {
+                        steelStraightKeys.add(pairKey);
+                    } else if(a.orient !== b.orient) {
+                        steelCornerKeys.add(pairKey);
+                    }
+                }
+            }
+        });
+
+        return {
+            brackets,
+            aluminumUniversal: aluminumUniversalKeys.size,
+            steelStraight: steelStraightKeys.size,
+            steelCorner: steelCornerKeys.size,
+            straight: aluminumUniversalKeys.size + steelStraightKeys.size,
+            corner: steelCornerKeys.size,
+            points: pointMap
+        };
+    }
+
+    function drawRailHardwareMarkers(layer) {
+        const hw = getRailHardwareSummary();
+        const drawnBrackets = new Set();
+
+        railings.forEach((r, idx) => {
+            ['start','end'].forEach(endName => {
+                const pt = railEndpoint(r, endName);
+                const k = `${idx}|${endName}`;
+                if(drawnBrackets.has(k)) return;
+                drawnBrackets.add(k);
+                const el = document.createElement('div');
+                el.className = 'rail-hardware-marker bracket';
+                el.title = `${r.bracket || 'Кр.ППл'} — кронштейн/струбцина перил`;
+                el.style.left = (pt.x * GRID + 2500) + 'px';
+                el.style.top = (pt.y * GRID + 2500) + 'px';
+                el.innerHTML = SVG_RAIL_BRACKET;
+                layer.appendChild(el);
+            });
+        });
+
+        Object.entries(hw.points).forEach(([key, items]) => {
+            if(items.length < 2) return;
+            const [x,y] = key.split(',').map(Number);
+            const hasSteel = items.some(it => String(it.rail.type).includes('ППл-Ст'));
+            const orientations = new Set(items.map(it => it.rail.orient));
+            const el = document.createElement('div');
+            el.className = 'rail-hardware-marker joiner';
+            if(!hasSteel) {
+                el.title = 'Соединитель секций алюминиевых перил, универсальный';
+                el.innerHTML = SVG_RAIL_JOINER;
+            } else {
+                el.title = orientations.size > 1
+                    ? 'СППл-У-Ст / угловой соединитель секций стальных перил'
+                    : 'СППл-Ст / прямой соединитель секций стальных перил';
+                el.innerHTML = orientations.size > 1 ? SVG_RAIL_CORNER : SVG_RAIL_JOINER;
+            }
+            el.style.left = (x * GRID + 2500) + 'px';
+            el.style.top = (y * GRID + 2500) + 'px';
+            layer.appendChild(el);
+        });
+    }
+
+    function drawStair(layer, st, idx) {
+        const el = document.createElement('div');
+        el.className = 'accessory-stair' + (selectedAccessory && selectedAccessory.kind==='stair' && selectedAccessory.idx===idx ? ' selected' : '');
+        el.dataset.kind = 'stair'; el.dataset.idx = idx;
+        const depth = (st.depth || getSelectedStairPreset()?.depth || 0.9) * GRID;
+        if(st.orient === 'H') {
+            el.style.width = ((st.end-st.start)*GRID)+'px';
+            el.style.height = depth+'px';
+            el.style.left = (st.start*GRID+2500)+'px';
+            el.style.top = (st.fixed*GRID+2500 + (st.side==='top' ? -depth : 0))+'px';
+            el.style.setProperty('--stair-stripes', '0deg');
+            const railL = document.createElement('div');
+            const railR = document.createElement('div');
+            railL.className = railR.className = 'stair-rail-2d';
+            railL.style.left = '4px'; railL.style.top = '0'; railL.style.width = '3px'; railL.style.height = '100%';
+            railR.style.right = '4px'; railR.style.top = '0'; railR.style.width = '3px'; railR.style.height = '100%';
+            el.appendChild(railL); el.appendChild(railR);
+        } else {
+            el.style.width = depth+'px';
+            el.style.height = ((st.end-st.start)*GRID)+'px';
+            el.style.left = (st.fixed*GRID+2500 + (st.side==='left' ? -depth : 0))+'px';
+            el.style.top = (st.start*GRID+2500)+'px';
+            el.style.setProperty('--stair-stripes', '90deg');
+            const railT = document.createElement('div');
+            const railB = document.createElement('div');
+            railT.className = railB.className = 'stair-rail-2d';
+            railT.style.left = '0'; railT.style.top = '4px'; railT.style.width = '100%'; railT.style.height = '3px';
+            railB.style.left = '0'; railB.style.bottom = '4px'; railB.style.width = '100%'; railB.style.height = '3px';
+            el.appendChild(railT); el.appendChild(railB);
+        }
+        const label = document.createElement('span');
+        label.style.zIndex = '3';
+        label.textContent = `${st.steps || ''} ст.`;
+        el.appendChild(label);
+        el.title = `${st.article || st.type || 'Лестница'} · ${st.steps || '?'} ступ. · перила лестницы в комплекте · ${(st.hMin||0).toFixed(1)}–${(st.hMax||0).toFixed(1)} м`;
+        layer.appendChild(el);
+    }
+
+    function drawDiagonal(layer, r) {
+        const el = document.createElement('div');
+        el.className = 'diag-marker';
+        let w,h,left,top;
+        if(r.orient === 'H') {
+            w=(r.end-r.start)*GRID; h=34; left=r.start*GRID+2500; top=r.fixed*GRID+2500+(r.side==='top'?-40:6);
+        } else {
+            w=34; h=(r.end-r.start)*GRID; left=r.fixed*GRID+2500+(r.side==='left'?-40:6); top=r.start*GRID+2500;
+        }
+        el.style.left=left+'px'; el.style.top=top+'px'; el.style.width=w+'px'; el.style.height=h+'px';
+        el.innerHTML = `<svg width="100%" height="100%" preserveAspectRatio="none"><line x1="0" y1="0" x2="100%" y2="100%" stroke="#111" stroke-width="4"/><line x1="100%" y1="0" x2="0" y2="100%" stroke="#111" stroke-width="4"/></svg>`;
+        layer.appendChild(el);
+    }
+
+    function drawFrame(layer, r) {
+        const el = document.createElement('div');
+        el.className = 'frame-marker';
+        let w,h,left,top;
+        if(r.orient === 'H') { w=(r.end-r.start)*GRID; h=46; left=r.start*GRID+2500; top=r.fixed*GRID+2500+(r.side==='top'?-52:10); }
+        else { w=46; h=(r.end-r.start)*GRID; left=r.fixed*GRID+2500+(r.side==='left'?-52:10); top=r.start*GRID+2500; }
+        el.style.left=left+'px'; el.style.top=top+'px'; el.style.width=w+'px'; el.style.height=h+'px';
+        el.innerHTML = `<svg width="100%" height="100%" preserveAspectRatio="none"><rect x="2" y="2" width="96%" height="96%" fill="none" stroke="#7c2d12" stroke-width="3"/><line x1="0" y1="100%" x2="100%" y2="0" stroke="#7c2d12" stroke-width="3"/></svg>`;
+        layer.appendChild(el);
+    }
+
+    function getReinforcementRuns() {
+        return { diagonals: [], frames: [] };
+    }
+
+    function getAutoReinforcementBlocks2x2() {
+        if(platforms.length === 0) return [];
+
+        // Строим занятость по клеткам 0.5×0.5, чтобы 2×2 блок мог состоять
+        // из двух платформ 2×1, двух 1×2 или комбинации меньших прямоугольников.
+        const occ = new Set();
+        let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+        platforms.forEach(p => {
+            minX = Math.min(minX, p.x); minY = Math.min(minY, p.y);
+            maxX = Math.max(maxX, p.x + p.w); maxY = Math.max(maxY, p.y + p.h);
+            for(let x=p.x; x<p.x+p.w-0.001; x+=0.5) {
+                for(let y=p.y; y<p.y+p.h-0.001; y+=0.5) {
+                    occ.add(`${x.toFixed(3)},${y.toFixed(3)}`);
+                }
+            }
+        });
+
+        // Отсчёт блоков начинается от фактического выступа/минимальной координаты формы.
+        // Поэтому если пользователь добавил выступ вперёд, шахматка начинается уже от него.
+        minX = Math.floor(minX * 2) / 2;
+        minY = Math.floor(minY * 2) / 2;
+
+        function blockFull(x0, y0) {
+            for(let x=x0; x<x0+2-0.001; x+=0.5) {
+                for(let y=y0; y<y0+2-0.001; y+=0.5) {
+                    if(!occ.has(`${x.toFixed(3)},${y.toFixed(3)}`)) return false;
+                }
+            }
+            return true;
+        }
+
+        const blocks = [];
+        for(let x=minX; x<=maxX-2+0.001; x+=2) {
+            for(let y=minY; y<=maxY-2+0.001; y+=2) {
+                if(blockFull(x,y)) {
+                    const ix = Math.round((x - minX) / 2);
+                    const iy = Math.round((y - minY) / 2);
+                    blocks.push({x,y,ix,iy, parity:(ix+iy)%2});
+                }
+            }
+        }
+
+        if(blocks.length <= 2) {
+            // Если блоков один-два — усиливаем все такие блоки:
+            // и внешний периметр, и внутреннюю грань между двумя 2×2 блоками.
+            return blocks;
+        }
+
+        // Если блоков минимум три — шахматный порядок.
+        // Берём цвет шахматки с большим количеством блоков; при равенстве — parity 0
+        // (для 3×3 это углы + центр).
+        const c0 = blocks.filter(b=>b.parity===0).length;
+        const c1 = blocks.filter(b=>b.parity===1).length;
+        const selectedParity = c0 >= c1 ? 0 : 1;
+        return blocks.filter(b => b.parity === selectedParity);
+    }
+
+    function getAutoReinforcementPieces() {
+        const hNum = parseFloat(document.getElementById('h-input').value) || 0;
+        if(hNum < 1.3) return [];
+
+        const blocks = getAutoReinforcementBlocks2x2();
+        const spans = [];
+        const seen = new Set();
+
+        function addSpan(span) {
+            // Геометрический ключ без учёта стороны: общую грань между двумя блоками
+            // оставляем одной диагональю/фермой, а не дублируем.
+            let key;
+            if(span.orient === 'H') key = `H|${span.fixed.toFixed(3)}|${span.start.toFixed(3)}|${span.end.toFixed(3)}`;
+            else key = `V|${span.fixed.toFixed(3)}|${span.start.toFixed(3)}|${span.end.toFixed(3)}`;
+            if(seen.has(key)) return;
+            seen.add(key);
+            spans.push(span);
+        }
+
+        blocks.forEach(b => {
+            addSpan({orient:'H', side:'top', fixed:b.y, start:b.x, end:b.x+2, len:2});
+            addSpan({orient:'H', side:'bottom', fixed:b.y+2, start:b.x, end:b.x+2, len:2});
+            addSpan({orient:'V', side:'left', fixed:b.x, start:b.y, end:b.y+2, len:2});
+            addSpan({orient:'V', side:'right', fixed:b.x+2, start:b.y, end:b.y+2, len:2});
+        });
+
+        return spans;
+    }
+
+    function autoDiagonals() {
+        const pieces = getAutoReinforcementPieces();
+        if(!pieces.length) { showToolNote('Авто-диагонали: нет 2×2 блоков из платформ или высота меньше 1.3 м.'); return; }
+        pushUndo();
+        pieces.forEach(p => {
+            const candidate = {...p, kind:'diagonal', type:'ДВ-Ап-2000'};
+            if(!reinforcements.some(r => r.kind === 'diagonal' && segmentOverlaps(candidate, r))) reinforcements.push(candidate);
+        });
+        updateAll();
+        showToolNote(`Авто-диагонали поставлены по 2×2 блокам: ${pieces.length} сторон.`);
+    }
+
+    function autoFrames() {
+        const hNum = parseFloat(document.getElementById('h-input').value) || 0;
+        if(hNum < 1.8 || hNum > 2.2) { showToolNote('Авто-фермы: по каталожному правилу фермы актуальны при высоте 1.8–2.2 м.'); return; }
+        const pieces = getAutoReinforcementPieces();
+        if(!pieces.length) { showToolNote('Авто-фермы: нет 2×2 блоков из платформ.'); return; }
+        pushUndo();
+        pieces.forEach(p => {
+            const candidate = {...p, kind:'frame', type:'Ферма Оп60-В1000-2000'};
+            if(!reinforcements.some(r => r.kind === 'frame' && segmentOverlaps(candidate, r))) reinforcements.push(candidate);
+        });
+        updateAll();
+        showToolNote(`Авто-фермы поставлены по 2×2 блокам: ${pieces.length} сторон.`);
+    }
+
+    function countRailJoiners() {
+        return getRailHardwareSummary().straight + getRailHardwareSummary().corner;
+    }
+
+    function refresh3DIfOpen() {
+        const modal = document.getElementById('modal3d');
+        if(modal && modal.classList.contains('open')) render3DScene();
+    }
+
+    // ---------- Главный расчетный движок ----------
+    function updateAll() {
+        const pLayer = document.getElementById('platforms-layer');
+        const sLayer = document.getElementById('supports-layer');
+        const perimLayer = document.getElementById('perimeter-layer');
+        const aLayer = document.getElementById('accessories-layer');
+        pLayer.innerHTML = ''; sLayer.innerHTML = ''; perimLayer.innerHTML = ''; aLayer.innerHTML = '';
+
+        let counts = { platforms: {}, connector: 0, insert: 0, clamp_1: 0, clamp_2: 0, legs: 0, joints: 0, rail1:0, rail2:0, railCustom:0, railClamp:0, railWeight:0, railBrackets:{}, railJoiners:0, railStraightJoiners:0, railCornerJoiners:0, railAlJoiners:0, railSteelStraightJoiners:0, railSteelCornerJoiners:0, stairs:0, stairByArticle:{}, stairWeight:0, stairRailKits:0, stairAnchorKits:0, diagonals:0, frames:0 };
+        const hNum = parseFloat(document.getElementById('h-input').value) || 0;
+        const isDoubtMode = document.getElementById('doubt-toggle').checked;
+        const showPerim = document.getElementById('perim-toggle').checked;
+        let edges = {};
+        let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+
+        platforms.forEach((p, i) => {
+            const el = document.createElement('div');
+            el.className = 'platform-rect' + (i === selectedIdx ? ' selected' : '');
+            el.dataset.idx = i;
+            el.style.left = (p.x * GRID + 2500) + 'px';
+            el.style.top = (p.y * GRID + 2500) + 'px';
+            el.style.width = (p.w * GRID) + 'px';
+            el.style.height = (p.h * GRID) + 'px';
+            const fontSize = Math.min(p.w, p.h) < 1 ? '10px' : '14px';
+            el.innerHTML = `<span style="font-size: ${fontSize}">${p.w}x${p.h}</span>`;
+            pLayer.appendChild(el);
+            counts.platforms[p.id] = (counts.platforms[p.id] || 0) + 1;
+            minX = Math.min(minX, p.x); minY = Math.min(minY, p.y);
+            maxX = Math.max(maxX, p.x + p.w); maxY = Math.max(maxY, p.y + p.h);
+            for(let dx=0; dx<p.w; dx+=0.5) {
+                let kT = `${p.x+dx},${p.y},H`, kB = `${p.x+dx},${p.y+p.h},H`;
+                edges[kT] = (edges[kT]||0)+1; edges[kB] = (edges[kB]||0)+1;
+            }
+            for(let dy=0; dy<p.h; dy+=0.5) {
+                let kL = `${p.x},${p.y+dy},V`, kR = `${p.x+p.w},${p.y+dy},V`;
+                edges[kL] = (edges[kL]||0)+1; edges[kR] = (edges[kR]||0)+1;
+            }
+        });
+
+        if (showPerim && platforms.length > 0 && maxX > minX && maxY > minY) {
+            let rectX = minX + 0.5, rectY = minY + 0.5, rectW = (maxX - minX) - 1.0, rectH = (maxY - minY) - 1.0;
+            let frame = document.createElement('div');
+            frame.style.position = 'absolute'; frame.style.left = (rectX * GRID + 2500) + 'px'; frame.style.top = (rectY * GRID + 2500) + 'px';
+            frame.style.width = (rectW * GRID) + 'px'; frame.style.height = (rectH * GRID) + 'px'; frame.style.zIndex = '12'; frame.style.pointerEvents = 'none';
+            let svgHTML = `<svg width="100%" height="100%" style="position:absolute; top:0; left:0; pointer-events:none; overflow:visible;">`;
+            let dash = "24, 16";
+            if (rectW > 0 && rectH > 0) svgHTML += `<rect x="0" y="0" width="100%" height="100%" fill="none" stroke="var(--danger)" stroke-width="3" stroke-dasharray="${dash}" />`;
+            else if (rectW > 0 && rectH === 0) svgHTML += `<line x1="0" y1="0" x2="100%" y2="0" stroke="var(--danger)" stroke-width="3" stroke-dasharray="${dash}" />`;
+            else if (rectW === 0 && rectH > 0) svgHTML += `<line x1="0" y1="0" x2="0" y2="100%" stroke="var(--danger)" stroke-width="3" stroke-dasharray="${dash}" />`;
+            svgHTML += `</svg>`; frame.innerHTML = svgHTML;
+            if (rectW >= 0 && rectH >= 0) perimLayer.appendChild(frame);
+        }
+
+        let nodes = {};
+        platforms.forEach(p => {
+            [[p.x,p.y], [p.x+p.w,p.y], [p.x,p.y+p.h], [p.x+p.w,p.y+p.h]].forEach(n => {
+                let key = n.join(',');
+                if (!nodes[key]) nodes[key] = { x: n[0], y: n[1], count: 0 };
+                nodes[key].count++;
+            });
+        });
+        counts.legs = platforms.length * 4;
+        for(let key in nodes) {
+            let nx = nodes[key].x, ny = nodes[key].y;
+            let sharedCount = nodes[key].count;
+            const leg = document.createElement('div');
+            leg.className = 'marker leg-support'; leg.style.left = (nx * GRID + 2500) + 'px'; leg.style.top = (ny * GRID + 2500) + 'px'; sLayer.appendChild(leg);
+            let e1 = edges[`${nx},${ny},H`], e2 = edges[`${nx-0.5},${ny},H`];
+            let e3 = edges[`${nx},${ny},V`], e4 = edges[`${nx},${ny-0.5},V`];
+            let isPerim = ((e1||0)===1 || (e2||0)===1 || (e3||0)===1 || (e4||0)===1);
+            if (sharedCount > 1) {
+                if (hNum >= 1.2) { drawSVG(sLayer, nx, ny, SVG_CLAMP_2, false, {x: 0, y: 0}); counts.clamp_2++; }
+                else if (hNum >= 0.4) {
+                    if (sharedCount === 3) { drawSVG(sLayer, nx, ny, SVG_CLAMP_2, false, {x: 0, y: 0}); counts.clamp_2++; }
+                    else if (sharedCount === 2 && isPerim) { drawSVG(sLayer, nx, ny, SVG_CLAMP_1, false, {x: 12, y: 0}); counts.clamp_1++; }
+                }
+            }
+        }
+
+        for(let i=0; i<platforms.length; i++) {
+            for(let j=i+1; j<platforms.length; j++) {
+                let p1 = platforms[i], p2 = platforms[j], joint = null;
+                if(Math.abs(p1.y + p1.h - p2.y) < 0.01 || Math.abs(p2.y + p2.h - p1.y) < 0.01) {
+                    let s = Math.max(p1.x, p2.x), e = Math.min(p1.x+p1.w, p2.x+p2.w);
+                    if(e > s) joint = { type: 'H', fixed: (Math.abs(p1.y + p1.h - p2.y) < 0.01 ? p1.y+p1.h : p2.y+p2.h), s, e, l: e-s };
+                } else if(Math.abs(p1.x + p1.w - p2.x) < 0.01 || Math.abs(p2.x + p2.w - p1.x) < 0.01) {
+                    let s = Math.max(p1.y, p2.y), e = Math.min(p1.y+p1.h, p2.y+p2.h);
+                    if(e > s) joint = { type: 'V', fixed: (Math.abs(p1.x + p1.w - p2.x) < 0.01 ? p1.x+p1.w : p2.x+p2.w), s, e, l: e-s };
+                }
+                if(joint) {
+                    counts.joints++;
+                    let isV = (joint.type === 'V');
+                    let ins1 = joint.s + joint.l * 0.2, ins2 = joint.s + joint.l * 0.8;
+                    drawSVG(sLayer, isV ? joint.fixed : ins1, isV ? ins1 : joint.fixed, SVG_INS, isV);
+                    drawSVG(sLayer, isV ? joint.fixed : ins2, isV ? ins2 : joint.fixed, SVG_INS, isV);
+                    counts.insert += 2;
+                    let spCount = (joint.l > 1.0 || isDoubtMode) ? 2 : 1;
+                    if (spCount === 1) {
+                        let mid = joint.s + joint.l * 0.5;
+                        drawSVG(sLayer, isV ? joint.fixed : mid, isV ? mid : joint.fixed, SVG_CONN, isV);
+                    } else {
+                        let sp1 = joint.s + joint.l * 0.35, sp2 = joint.s + joint.l * 0.65;
+                        drawSVG(sLayer, isV ? joint.fixed : sp1, isV ? sp1 : joint.fixed, SVG_CONN, isV);
+                        drawSVG(sLayer, isV ? joint.fixed : sp2, isV ? sp2 : joint.fixed, SVG_CONN, isV);
+                    }
+                    counts.connector += spCount;
+                }
+            }
+        }
+
+        railings.forEach((r,idx)=>{
+            drawRail(aLayer,r,idx);
+            if(Math.abs(r.len-2)<.01) counts.rail2++; else if(Math.abs(r.len-1)<.01) counts.rail1++; else counts.railCustom++;
+            counts.railWeight += (r.weight || 0);
+        });
+        drawRailHardwareMarkers(aLayer);
+        const railHw = getRailHardwareSummary();
+        counts.railBrackets = railHw.brackets;
+        counts.railAlJoiners = railHw.aluminumUniversal;
+        counts.railSteelStraightJoiners = railHw.steelStraight;
+        counts.railSteelCornerJoiners = railHw.steelCorner;
+        counts.railStraightJoiners = railHw.straight;
+        counts.railCornerJoiners = railHw.corner;
+        counts.railJoiners = railHw.aluminumUniversal + railHw.steelStraight + railHw.steelCorner;
+        stairs.forEach((st,idx)=>drawStair(aLayer,st,idx));
+        reinforcements.forEach((r,idx)=>drawManualReinforcement(aLayer,r,idx));
+        counts.stairs = stairs.length;
+        stairs.forEach(st => {
+            const name = st.article || st.type || 'Лестница ЛПС1000';
+            if(!counts.stairByArticle[name]) counts.stairByArticle[name] = {count:0, weight:0, steps:st.steps || 0, range:(st.hMin && st.hMax) ? `${st.hMin}–${st.hMax} м` : ''};
+            counts.stairByArticle[name].count++;
+            counts.stairByArticle[name].weight += (st.weight || 0);
+            counts.stairWeight += (st.weight || 0);
+            counts.stairRailKits += 1;
+            counts.stairAnchorKits += 2;
+        });
+        counts.railClamp = Object.values(counts.railBrackets || {}).reduce((a,b)=>a+b,0);
+
+        const reinf = getReinforcementRuns();
+        reinf.diagonals.forEach(r=>drawDiagonal(aLayer,r));
+        reinf.frames.forEach(r=>drawFrame(aLayer,r));
+        counts.diagonals = reinf.diagonals.length + reinforcements.filter(r=>r.kind==='diagonal').length;
+        counts.frames = reinf.frames.length + reinforcements.filter(r=>r.kind==='frame').length;
+
+        renderSpecAndFooter(counts, minX, minY, maxX, maxY);
+        refresh3DIfOpen();
+    }
+
+    function addSpecRow(body, pBody, lineObj, title, count, unit, weight, totalWeightObj) {
+        const weightText = weight > 0 ? weight.toFixed(1) : '—';
+        if(weight > 0) totalWeightObj.value += weight;
+        body.innerHTML += `<tr><td>${title}</td><td class="num-col">${count}</td><td class="num-col">${weightText}</td></tr>`;
+        pBody.innerHTML += `<tr><td style="text-align:center">${lineObj.value++}</td><td>${title}</td><td style="text-align:center">${count}</td><td style="text-align:center">${unit}</td><td style="text-align:center">${weightText}</td></tr>`;
+    }
+
+    function renderSpecAndFooter(counts, minX, minY, maxX, maxY) {
+        const model = document.getElementById('model-select').value;
+        const hNum = parseFloat(document.getElementById('h-input').value) || 0;
+        const projectName = document.getElementById('project-name').value || '---';
+        const managerName = document.getElementById('user-fio').value || '________________';
+        const body = document.getElementById('spec-body');
+        const pBody = document.getElementById('p-spec');
+        body.innerHTML = ''; pBody.innerHTML = '';
+        let totalWeightObj = {value:0}; let lineObj = {value:1}; let totalPlatforms = 0;
+
+        for(let id in counts.platforms) {
+            let n = counts.platforms[id]; totalPlatforms += n;
+            let w = WEIGHTS[model][id] * n; totalWeightObj.value += w;
+            const uiName = `Платформа ${id} (${model === 'PP90' ? 'Пл90' : 'Пл110'})`;
+            body.innerHTML += `<tr><td>${uiName}</td><td class="num-col">${n}</td><td class="num-col">${w.toFixed(1)}</td></tr>`;
+            pBody.innerHTML += `<tr><td style="text-align:center">${lineObj.value++}</td><td>Платформа сценическая ${id} (${model === 'PP90' ? 'Пл90' : 'Пл110'})</td><td style="text-align:center">${n}</td><td style="text-align:center">шт.</td><td style="text-align:center">${w.toFixed(1)}</td></tr>`;
+        }
+
+        if (counts.legs > 0) {
+            let legW = counts.legs * WEIGHTS.COMP.leg; totalWeightObj.value += legW;
+            body.innerHTML += `<tr><td>Опора телескоп. h=${hNum}м</td><td class="num-col" style="color:var(--valid)">${counts.legs}</td><td class="num-col">${legW.toFixed(1)}</td></tr>`;
+            pBody.innerHTML += `<tr><td style="text-align:center">${lineObj.value++}</td><td>Опора телескопическая квадратная 60х60, h=${hNum}м</td><td style="text-align:center">${counts.legs}</td><td style="text-align:center">шт.</td><td style="text-align:center">${legW.toFixed(1)}</td></tr>`;
+        }
+
+        let totalClamps = counts.clamp_1 + (counts.clamp_2 * 2);
+        const comps = [
+            { art: 'СП-01-АБ', name: 'Соединитель профиля СП-01-АБ', count: counts.connector, w: WEIGHTS.COMP.connector * counts.connector },
+            { art: 'ГВПв', name: 'Вставка выравнивающая ГВПв', count: counts.insert, w: WEIGHTS.COMP.insert * counts.insert },
+            { art: 'СОп60', name: 'Струбцина крепления опор СОп60', count: totalClamps, w: WEIGHTS.COMP.clamp * totalClamps }
+        ];
+        comps.forEach(c => { if(c.count > 0) addSpecRow(body, pBody, lineObj, c.name, c.count, 'шт.', c.w, totalWeightObj); });
+
+        const railByArticle = {};
+        railings.forEach(r => {
+            const key = r.type || (Math.abs(r.len-2)<.01 ? 'ППл-Ал-2000|КР' : 'ППл-Ал-1000|КР');
+            if(!railByArticle[key]) railByArticle[key] = {count:0, weight:0};
+            railByArticle[key].count++;
+            railByArticle[key].weight += (r.weight || 0);
+        });
+        Object.entries(railByArticle).forEach(([name, obj]) => {
+            addSpecRow(body, pBody, lineObj, `Перила платформ ${name}`, obj.count, 'шт.', obj.weight, totalWeightObj);
+        });
+        if(counts.railCustom > 0) addSpecRow(body, pBody, lineObj, 'Перила нестандартные / участок 0.5 м — ручная проверка', counts.railCustom, 'шт.', 0, totalWeightObj);
+        Object.entries(counts.railBrackets || {}).forEach(([name, count]) => {
+            addSpecRow(body, pBody, lineObj, `Кронштейн / струбцина крепления перил ${name}`, count, 'шт.', 0, totalWeightObj);
+        });
+        if((counts.railAlJoiners || 0) > 0) {
+            addSpecRow(body, pBody, lineObj, 'Соединитель секций алюминиевых перил, универсальный', counts.railAlJoiners, 'шт.', 0, totalWeightObj);
+        }
+        if((counts.railSteelStraightJoiners || 0) > 0) {
+            addSpecRow(body, pBody, lineObj, 'Соединитель прямой секций стальных перил СППл-Ст', counts.railSteelStraightJoiners, 'шт.', 0, totalWeightObj);
+        }
+        if((counts.railSteelCornerJoiners || 0) > 0) {
+            addSpecRow(body, pBody, lineObj, 'Соединитель угловой секций стальных перил СППл-У-Ст', counts.railSteelCornerJoiners, 'шт.', 0, totalWeightObj);
+        }
+        if(counts.stairs > 0) {
+            Object.entries(counts.stairByArticle || {}).forEach(([name, obj]) => {
+                const details = obj.steps ? ` (${obj.steps} ступ., рабочий диапазон ${obj.range}; перила лестницы в комплекте)` : ' (перила лестницы в комплекте)';
+                addSpecRow(body, pBody, lineObj, `Лестница ${name}${details}`, obj.count, 'шт.', obj.weight, totalWeightObj);
+            });
+            addSpecRow(body, pBody, lineObj, 'Комплект перил лестницы — входит в состав лестницы', counts.stairRailKits, 'компл.', 0, totalWeightObj);
+            addSpecRow(body, pBody, lineObj, 'Закладная пластина лестницы с винтами М10x12 DIN912 — комплект', counts.stairAnchorKits, 'компл.', 0, totalWeightObj);
+        }
+        if(counts.diagonals > 0) addSpecRow(body, pBody, lineObj, 'Диагональ ДВ-Ап-2000, обязательна при h ≥ 1.3 м', counts.diagonals, 'шт.', counts.diagonals * WEIGHTS.COMP.diagonal, totalWeightObj);
+        if(counts.frames > 0) addSpecRow(body, pBody, lineObj, 'Ферма для опор Оп60-В1000-2000, при h 1.8–2.2 м', counts.frames, 'шт.', counts.frames * WEIGHTS.COMP.frame, totalWeightObj);
+
+        if (counts.joints > 0) {
+            body.innerHTML += `<tr><td style="color:#94a3b8;">Количество стыков (справочно)</td><td class="num-col" style="color:#94a3b8;">${counts.joints}</td><td class="num-col" style="color:#94a3b8;">-</td></tr>`;
+            pBody.innerHTML += `<tr><td style="text-align:center">${lineObj.value++}</td><td>Количество стыков платформ (справочно)</td><td style="text-align:center">${counts.joints}</td><td style="text-align:center">шт.</td><td style="text-align:center">-</td></tr>`;
+        }
+        if(counts.rail2 || counts.rail1 || counts.stairs || counts.diagonals || counts.frames) {
+            body.innerHTML += `<tr><td colspan="3" style="color:var(--warning);font-size:.72rem;line-height:1.45;">Вес перил, лестниц, диагоналей и ферм не включен: нужно заполнить коэффициенты WEIGHTS.COMP по актуальному прайсу/паспорту.</td></tr>`;
+        }
+        body.innerHTML += `<tr class="sum-row"><td>ИТОГО ВЕС (кг):</td><td colspan="2" class="num-col">${totalWeightObj.value.toFixed(1)}</td></tr>`;
+        document.getElementById('f-platforms').innerText = totalPlatforms;
+        document.getElementById('f-legs').innerText = counts.legs;
+        document.getElementById('f-joints').innerText = counts.joints;
+        document.getElementById('f-weight').innerText = totalWeightObj.value.toFixed(1) + ' кг';
+        document.getElementById('p-total-weight').innerText = totalWeightObj.value.toFixed(1);
+        document.getElementById('p-project-title').innerText = `Объект / Заказчик: ${projectName}`;
+        document.getElementById('p-fio').innerText = managerName;
+        document.getElementById('p-customer').innerText = projectName;
+        document.getElementById('p-date').innerText = `Дата: ${new Date().toLocaleDateString('ru-RU')}`;
+
+        const pScheme = document.getElementById('print-scheme');
+        pScheme.innerHTML = '';
+        if(platforms.length > 0) {
+            const pad = 80;
+            let bw = (maxX - minX) * GRID + pad * 2;
+            let bh = (maxY - minY) * GRID + pad * 2;
+            const wrap = document.createElement('div');
+            wrap.style.width = bw + 'px'; wrap.style.height = bh + 'px'; wrap.style.position = 'relative';
+            platforms.forEach(p => {
+                const el = document.createElement('div');
+                el.style.position = 'absolute'; el.style.border = '2px solid black'; el.style.background = 'white'; el.style.boxSizing = 'border-box';
+                el.style.display = 'flex'; el.style.alignItems = 'center'; el.style.justifyContent = 'center'; el.style.fontWeight = 'bold'; el.style.color = 'black';
+                el.style.left = (p.x - minX) * GRID + pad + 'px'; el.style.top = (p.y - minY) * GRID + pad + 'px';
+                el.style.width = (p.w * GRID) + 'px'; el.style.height = (p.h * GRID) + 'px';
+                el.innerHTML = `<span style="font-size: ${Math.min(p.w, p.h) < 1 ? '10px' : '14px'}">${p.w}x${p.h}</span>`;
+                wrap.appendChild(el);
+            });
+            ['perimeter-layer','supports-layer','accessories-layer'].forEach(layerId => {
+                const layer = document.getElementById(layerId);
+                Array.from(layer.children).forEach(child => {
+                    const clone = child.cloneNode(true);
+                    const currentLeft = parseFloat(clone.style.left);
+                    const currentTop = parseFloat(clone.style.top);
+                    if(!isFinite(currentLeft) || !isFinite(currentTop)) return;
+                    clone.style.left = (currentLeft - 2500 - minX * GRID + pad) + 'px';
+                    clone.style.top = (currentTop - 2500 - minY * GRID + pad) + 'px';
+                    const svgElem = clone.querySelector('svg');
+                    if(svgElem) svgElem.querySelectorAll('rect, line').forEach(el => { if(el.getAttribute('stroke')?.includes('var')) el.setAttribute('stroke', '#000'); });
+                    wrap.appendChild(clone);
+                });
+            });
+            const outerWrap = document.createElement('div');
+            outerWrap.style.width = '100%'; outerWrap.style.height = '100%'; outerWrap.style.position = 'relative'; outerWrap.style.overflow = 'hidden';
+            const maxW = 900, maxH = 380, scale = Math.min(1, maxW / bw, maxH / bh);
+            wrap.style.position = 'absolute'; wrap.style.left = '50%'; wrap.style.top = '50%'; wrap.style.transform = `translate(-50%, -50%) scale(${scale})`; wrap.style.transformOrigin = 'center center';
+            outerWrap.appendChild(wrap); pScheme.appendChild(outerWrap);
+        }
+    }
+
+    // ---------- Офлайн 3D-просмотр без внешних библиотек ----------
+    const viewer3DState = {
+        canvas: null,
+        ctx: null,
+        yaw: -Math.PI / 4,
+        pitch: 0.62,
+        zoom: 100,
+        panX: 0,
+        panY: 0,
+        dragging: false,
+        panning: false,
+        lastX: 0,
+        lastY: 0,
+        points: [],
+        center: {x:0, y:0.8, z:0},
+        bounds: {minX:0,maxX:0,minY:0,maxY:0,minZ:0,maxZ:0},
+        editMode: 'orbit',
+        mouseDownX: 0,
+        mouseDownY: 0,
+        dragged: false,
+        hoverSpan: null
+    };
+
+
+    function set3DEditMode(mode) {
+        viewer3DState.editMode = mode || 'orbit';
+        ['orbit','diagonal','frame','delete'].forEach(m => {
+            const btn = document.getElementById('btn-3d-' + m);
+            if(btn) btn.classList.toggle('active3d', viewer3DState.editMode === m);
+        });
+        const hint = document.getElementById('hint-3d-edit');
+        if(hint) {
+            if(viewer3DState.editMode === 'orbit') hint.innerText = 'Вращение: ЛКМ · Масштаб: колесо · ПКМ/Shift: панорама';
+            if(viewer3DState.editMode === 'diagonal') hint.innerText = '3D-редактирование: клик по пролёту 2 м ставит диагональ';
+            if(viewer3DState.editMode === 'frame') hint.innerText = '3D-редактирование: клик по пролёту 2 м ставит ферму';
+            if(viewer3DState.editMode === 'delete') hint.innerText = '3D-редактирование: клик по элементу удаляет его';
+        }
+        render3DScene();
+    }
+
+    function show3D() {
+        document.getElementById('modal3d').classList.add('open');
+        ensure3DCanvas();
+        set3DEditMode(viewer3DState.editMode || 'orbit');
+        set3DView('iso');
+    }
+
+    function save3DImage() {
+        ensure3DCanvas();
+        render3DScene();
+
+        const srcCanvas = viewer3DState.canvas;
+        if(!srcCanvas) return;
+
+        const out = document.createElement('canvas');
+        out.width = srcCanvas.width;
+        out.height = srcCanvas.height;
+        const ctx = out.getContext('2d');
+
+        ctx.fillStyle = '#f8fafc';
+        ctx.fillRect(0, 0, out.width, out.height);
+        ctx.drawImage(srcCanvas, 0, 0);
+
+        const text = 'Calculation program made by Arkhangelskiy';
+        const pad = Math.max(16, Math.round(out.width * 0.018));
+        const fontSize = Math.max(13, Math.round(out.width * 0.018));
+        ctx.font = `700 ${fontSize}px Inter, Arial, sans-serif`;
+        const metrics = ctx.measureText(text);
+        const boxW = metrics.width + pad * 1.35;
+        const boxH = fontSize + pad * 0.9;
+        const x = out.width - boxW - pad;
+        const y = out.height - boxH - pad;
+
+        ctx.fillStyle = 'rgba(255,255,255,.86)';
+        ctx.strokeStyle = 'rgba(15,23,42,.28)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.roundRect(x, y, boxW, boxH, 10);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = '#0f172a';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(text, x + pad * 0.65, y + boxH / 2);
+
+        const name = (document.getElementById('project-name')?.value || 'al-podium-3d').replace(/[\\/:*?"<>|]+/g,'_');
+        out.toBlob(blob => {
+            if(!blob) return;
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = name + '_3d.png';
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 300);
+        }, 'image/png');
+    }
+
+    function close3D() {
+        document.getElementById('modal3d').classList.remove('open');
+    }
+
+    function ensure3DCanvas() {
+        const box = document.getElementById('viewer3d');
+        if(!viewer3DState.canvas) {
+            const canvas = document.createElement('canvas');
+            canvas.id = 'viewer3dCanvas';
+            box.innerHTML = '';
+            box.appendChild(canvas);
+            viewer3DState.canvas = canvas;
+            viewer3DState.ctx = canvas.getContext('2d');
+            canvas.addEventListener('contextmenu', e => e.preventDefault());
+            canvas.addEventListener('mousedown', on3DPointerDown);
+            canvas.addEventListener('mousemove', on3DCanvasMove);
+            window.addEventListener('mousemove', on3DPointerMove);
+            window.addEventListener('mouseup', on3DPointerUp);
+            canvas.addEventListener('wheel', on3DWheel, { passive:false });
+        }
+        resize3DViewer();
+    }
+
+    window.addEventListener('resize', () => {
+        if(document.getElementById('modal3d').classList.contains('open')) resize3DViewer();
+    });
+
+    function on3DPointerDown(e) {
+        viewer3DState.mouseDownX = e.clientX;
+        viewer3DState.mouseDownY = e.clientY;
+        viewer3DState.dragged = false;
+
+        if(viewer3DState.editMode !== 'orbit' && !e.shiftKey && e.button !== 2) {
+            viewer3DState.dragging = false;
+            viewer3DState.panning = false;
+            return;
+        }
+
+        viewer3DState.dragging = !e.shiftKey && e.button !== 2;
+        viewer3DState.panning = e.shiftKey || e.button === 2;
+        viewer3DState.lastX = e.clientX;
+        viewer3DState.lastY = e.clientY;
+    }
+
+    function on3DCanvasMove(e) {
+        if(viewer3DState.editMode === 'orbit') return;
+        const rect = viewer3DState.canvas.getBoundingClientRect();
+        const mx = e.clientX - rect.left;
+        const my = e.clientY - rect.top;
+        viewer3DState.hoverSpan = findNearest3DSpan(mx, my, viewer3DState.editMode);
+        render3DScene();
+    }
+
+    function on3DPointerMove(e) {
+        if(!viewer3DState.dragging && !viewer3DState.panning) return;
+        const dx = e.clientX - viewer3DState.lastX;
+        const dy = e.clientY - viewer3DState.lastY;
+        if(Math.abs(e.clientX - viewer3DState.mouseDownX) + Math.abs(e.clientY - viewer3DState.mouseDownY) > 3) viewer3DState.dragged = true;
+        viewer3DState.lastX = e.clientX;
+        viewer3DState.lastY = e.clientY;
+        if(viewer3DState.dragging) {
+            viewer3DState.yaw += dx * 0.01;
+            viewer3DState.pitch = Math.max(-1.35, Math.min(1.35, viewer3DState.pitch + dy * 0.01));
+        } else if(viewer3DState.panning) {
+            viewer3DState.panX += dx;
+            viewer3DState.panY += dy;
+        }
+        render3DScene();
+    }
+
+    function on3DPointerUp(e) {
+        const wasDrag = viewer3DState.dragged;
+        viewer3DState.dragging = false;
+        viewer3DState.panning = false;
+
+        if(viewer3DState.editMode !== 'orbit' && !wasDrag && e.button !== 2 && !e.shiftKey) {
+            const rect = viewer3DState.canvas.getBoundingClientRect();
+            const mx = e.clientX - rect.left;
+            const my = e.clientY - rect.top;
+            handle3DEditClick(mx, my);
+        }
+    }
+
+    function on3DWheel(e) {
+        e.preventDefault();
+        viewer3DState.zoom *= e.deltaY > 0 ? 0.92 : 1.08;
+        viewer3DState.zoom = Math.max(20, Math.min(420, viewer3DState.zoom));
+        render3DScene();
+    }
+
+
+
+    function screenToWorldOnPlane3D(mx, my, worldY=0) {
+        const canvas = viewer3DState.canvas;
+        const rx = (mx - canvas.width/2 - viewer3DState.panX) / viewer3DState.zoom;
+        const ry = -(my - canvas.height/2 - viewer3DState.panY) / viewer3DState.zoom;
+        const c = viewer3DState.center;
+        const cy = Math.cos(viewer3DState.yaw), sy = Math.sin(viewer3DState.yaw);
+        const cp = Math.cos(viewer3DState.pitch), sp = Math.sin(viewer3DState.pitch);
+        const y0 = worldY - c.y;
+        let z1 = 0;
+        if(Math.abs(sp) > 0.001) z1 = (y0 * cp - ry) / sp;
+        const x0 = rx * cy + z1 * sy;
+        const z0 = -rx * sy + z1 * cy;
+        return { x: x0 + c.x, y: worldY, z: z0 + c.z };
+    }
+
+    function findNearest3DDeleteTarget(mx, my) {
+        let best = null;
+        reinforcements.forEach((r, idx) => {
+            const [a3,b3] = spanEndPoints3D(r);
+            const a = projectPoint(a3), b = projectPoint(b3);
+            const d = distancePointToSegment2D(mx,my,a.x,a.y,b.x,b.y);
+            if(d < 18 && (!best || d < best.d)) best = {kind:'reinforcement', idx, d};
+        });
+        return best;
+    }
+
+    function get3DSpanCandidates(mode='diagonal') {
+        const spans = [];
+        const nodeList = Object.values(getSupportNodesMap ? getSupportNodesMap() : {});
+        const rows = {};
+        nodeList.forEach(n => { const k = n.y.toFixed(3); (rows[k] ||= []).push(n.x); });
+        Object.entries(rows).forEach(([yk, xs]) => {
+            xs = [...new Set(xs)].sort((a,b)=>a-b);
+            for(let i=0;i<xs.length;i++) for(let j=i+1;j<xs.length;j++) {
+                if(Math.abs(xs[j]-xs[i]-2)>0.01) continue;
+                const fixed = parseFloat(yk);
+                spans.push({orient:'H', side:'bottom', fixed, start:xs[i], end:xs[j], len:2, kind:mode});
+                spans.push({orient:'H', side:'top', fixed, start:xs[i], end:xs[j], len:2, kind:mode});
+            }
+        });
+        const cols = {};
+        nodeList.forEach(n => { const k = n.x.toFixed(3); (cols[k] ||= []).push(n.y); });
+        Object.entries(cols).forEach(([xk, ys]) => {
+            ys = [...new Set(ys)].sort((a,b)=>a-b);
+            for(let i=0;i<ys.length;i++) for(let j=i+1;j<ys.length;j++) {
+                if(Math.abs(ys[j]-ys[i]-2)>0.01) continue;
+                const fixed = parseFloat(xk);
+                spans.push({orient:'V', side:'right', fixed, start:ys[i], end:ys[j], len:2, kind:mode});
+                spans.push({orient:'V', side:'left', fixed, start:ys[i], end:ys[j], len:2, kind:mode});
+            }
+        });
+        return spans;
+    }
+
+    function spanMid3D(span) {
+        const hNum = parseFloat(document.getElementById('h-input').value) || 0.8;
+        const y = Math.max(0.45, Math.min(hNum - 0.1, 1.1));
+        const off = 0.08;
+        if(span.orient === 'H') return {x:(span.start+span.end)/2, y, z:span.fixed + (span.side==='top' ? -off : off)};
+        return {x:span.fixed + (span.side==='left' ? -off : off), y, z:(span.start+span.end)/2};
+    }
+
+    function spanEndPoints3D(span) {
+        const hNum = parseFloat(document.getElementById('h-input').value) || 0.8;
+        const y = Math.max(0.45, Math.min(hNum - 0.1, 1.1));
+        const off = 0.08;
+        if(span.orient === 'H') {
+            const z = span.fixed + (span.side==='top' ? -off : off);
+            return [{x:span.start,y,z},{x:span.end,y,z}];
+        }
+        const x = span.fixed + (span.side==='left' ? -off : off);
+        return [{x,y,z:span.start},{x,y,z:span.end}];
+    }
+
+    function distancePointToSegment2D(px, py, ax, ay, bx, by) {
+        const vx = bx-ax, vy = by-ay;
+        const wx = px-ax, wy = py-ay;
+        const c1 = vx*wx + vy*wy;
+        const c2 = vx*vx + vy*vy;
+        const t = c2 ? Math.max(0, Math.min(1, c1/c2)) : 0;
+        const qx = ax + t*vx, qy = ay + t*vy;
+        return Math.hypot(px-qx, py-qy);
+    }
+
+    function findNearest3DSpan(mx, my, mode) {
+        if(mode === 'delete') {
+            const target = findNearest3DDeleteTarget(mx, my);
+            return target ? {...target, deleteTarget:true} : null;
+        }
+
+        let best = null;
+        get3DSpanCandidates(mode).forEach(sp => {
+            const [a3,b3] = spanEndPoints3D(sp);
+            const a = projectPoint(a3), b = projectPoint(b3);
+            const d = distancePointToSegment2D(mx,my,a.x,a.y,b.x,b.y);
+            if(d < 22 && (!best || d < best.d)) best = {...sp, d};
+        });
+        return best;
+    }
+
+    function handle3DEditClick(mx, my) {
+        const mode = viewer3DState.editMode;
+
+        if(mode === 'orbit') return;
+
+        const found = findNearest3DSpan(mx, my, mode);
+        if(!found) { showToolNote('В 3D рядом нет подходящего пролёта диагонали/фермы.'); return; }
+
+        if(mode === 'delete') {
+            if(found.deleteTarget && found.kind === 'reinforcement') {
+                pushUndo();
+                reinforcements.splice(found.idx, 1);
+                updateAll();
+                render3DScene();
+                showToolNote('Усиление удалено в 3D.');
+            } else {
+                showToolNote('В 3D удаляются только диагонали и фермы.');
+            }
+            return;
+        }
+
+        const candidate = {...found, kind: mode, type: mode === 'diagonal' ? 'ДВ-Ап-2000' : 'Ферма Оп60-В1000-2000'};
+        delete candidate.d;
+        if(reinforcements.some(rr => segmentOverlaps(candidate, rr) && rr.kind === candidate.kind)) {
+            showToolNote('На этом пролёте уже стоит такой элемент.');
+            return;
+        }
+        pushUndo();
+        reinforcements.push(candidate);
+        updateAll();
+        render3DScene();
+        showToolNote(mode === 'diagonal' ? 'Диагональ поставлена в 3D.' : 'Ферма поставлена в 3D.');
+    }
+
+    function resize3DViewer() {
+        if(!viewer3DState.canvas) return;
+        const box = document.getElementById('viewer3d');
+        const w = Math.max(100, box.clientWidth);
+        const h = Math.max(100, box.clientHeight);
+        viewer3DState.canvas.width = w;
+        viewer3DState.canvas.height = h;
+        render3DScene();
+    }
+
+    function rotatePoint(p) {
+        const c = viewer3DState.center;
+        const x0 = p.x - c.x, y0 = p.y - c.y, z0 = p.z - c.z;
+        const cy = Math.cos(viewer3DState.yaw), sy = Math.sin(viewer3DState.yaw);
+        const cp = Math.cos(viewer3DState.pitch), sp = Math.sin(viewer3DState.pitch);
+        const x1 = x0 * cy - z0 * sy;
+        const z1 = x0 * sy + z0 * cy;
+        const y1 = y0;
+        const y2 = y1 * cp - z1 * sp;
+        const z2 = y1 * sp + z1 * cp;
+        return { x:x1, y:y2, z:z2 };
+    }
+
+    function projectPoint(p) {
+        const r = rotatePoint(p);
+        const c = viewer3DState.canvas;
+        return {
+            x: c.width / 2 + viewer3DState.panX + r.x * viewer3DState.zoom,
+            y: c.height / 2 + viewer3DState.panY - r.y * viewer3DState.zoom,
+            depth: r.z
+        };
+    }
+
+    function pushFace(arr, points, fill='#ffffff', stroke='#111111', lineWidth=1.6) {
+        arr.push({
+            type:'face', fill, stroke, lineWidth,
+            pts: points,
+            depth: points.reduce((s,p)=>s+rotatePoint(p).z,0)/points.length
+        });
+    }
+    function pushLine(arr, a, b, stroke='#111111', lineWidth=2.5) {
+        arr.push({
+            type:'line', stroke, lineWidth,
+            a, b,
+            depth: (rotatePoint(a).z + rotatePoint(b).z) / 2
+        });
+    }
+
+    function pushOverlayLine(arr, a, b, stroke='#111111', lineWidth=2.5) {
+        arr.push({
+            type:'overlayLine', stroke, lineWidth,
+            a, b,
+            depth: 9999
+        });
+    }
+
+    function pushMarker(arr, pnt, kind, label='', size=8) {
+        arr.push({
+            type:'marker',
+            p: pnt,
+            kind,
+            label,
+            size,
+            depth: 10000
+        });
+    }
+
+    function boxVertices(x1,y1,z1,x2,y2,z2) {
+        return {
+            A:{x:x1,y:y1,z:z1}, B:{x:x2,y:y1,z:z1}, C:{x:x2,y:y2,z:z1}, D:{x:x1,y:y2,z:z1},
+            E:{x:x1,y:y1,z:z2}, F:{x:x2,y:y1,z:z2}, G:{x:x2,y:y2,z:z2}, H:{x:x1,y:y2,z:z2}
+        };
+    }
+    function pushBox(arr, x1,y1,z1,x2,y2,z2, palette={top:'#ffffff', side1:'#dde5ec', side2:'#eef3f7', stroke:'#111111'}) {
+        const v = boxVertices(x1,y1,z1,x2,y2,z2);
+        pushFace(arr, [v.D,v.C,v.G,v.H], palette.top, palette.stroke, 1.8);     // top
+        pushFace(arr, [v.C,v.B,v.F,v.G], palette.side1, palette.stroke, 1.2);    // right/front
+        pushFace(arr, [v.D,v.H,v.E,v.A], palette.side2, palette.stroke, 1.2);    // left/back
+    }
+
+    function build3DData() {
+        const primitives = [];
+        const points = [];
+        function addPoint(p){ points.push(p); return p; }
+        function p(x,y,z){ return addPoint({x,y,z}); }
+        function addBoxPoints(x1,y1,z1,x2,y2,z2){
+            [
+                {x:x1,y:y1,z:z1},{x:x2,y:y1,z:z1},{x:x2,y:y2,z:z1},{x:x1,y:y2,z:z1},
+                {x:x1,y:y1,z:z2},{x:x2,y:y1,z:z2},{x:x2,y:y2,z:z2},{x:x1,y:y2,z:z2}
+            ].forEach(addPoint);
+        }
+
+        if(platforms.length === 0) return { primitives, points };
+        const hNum = parseFloat(document.getElementById('h-input').value) || 0.8;
+        const deckThickness = 0.12;
+
+        let minX=Infinity, maxX=-Infinity, minZ=Infinity, maxZ=-Infinity;
+        platforms.forEach(pl => {
+            minX = Math.min(minX, pl.x); maxX = Math.max(maxX, pl.x + pl.w);
+            minZ = Math.min(minZ, pl.y); maxZ = Math.max(maxZ, pl.y + pl.h);
+            pushBox(primitives, pl.x, hNum - deckThickness, pl.y, pl.x + pl.w, hNum, pl.y + pl.h); addBoxPoints(pl.x, hNum - deckThickness, pl.y, pl.x + pl.w, hNum, pl.y + pl.h);
+        });
+
+        // ground grid
+        const gx0 = Math.floor(minX) - 1, gx1 = Math.ceil(maxX) + 1;
+        const gz0 = Math.floor(minZ) - 1, gz1 = Math.ceil(maxZ) + 1;
+        for(let x = gx0; x <= gx1; x += 1) pushLine(primitives, p(x,0,gz0), p(x,0,gz1), '#d6dde4', 1);
+        for(let z = gz0; z <= gz1; z += 1) pushLine(primitives, p(gx0,0,z), p(gx1,0,z), '#d6dde4', 1);
+
+        const nodes = {};
+        platforms.forEach(pl => [[pl.x,pl.y],[pl.x+pl.w,pl.y],[pl.x,pl.y+pl.h],[pl.x+pl.w,pl.y+pl.h]].forEach(n => {
+            const key = n.join(',');
+            if(!nodes[key]) nodes[key] = { x:n[0], z:n[1], count:0 };
+            nodes[key].count++;
+        }));
+
+        // Полурендер опор: боксы + поверхностные линии, чтобы нижние стойки были видны с любого ракурса.
+        Object.values(nodes).forEach(n => {
+            const lx = n.x, lz = n.z;
+            pushBox(primitives, lx-0.03, 0.03, lz-0.03, lx+0.03, hNum - deckThickness, lz+0.03, {top:'#f8fafc', side1:'#edf2f7', side2:'#edf2f7', stroke:'#475569'}); addBoxPoints(lx-0.03, 0.03, lz-0.03, lx+0.03, hNum - deckThickness, lz+0.03);
+            pushBox(primitives, lx-0.055, 0.0, lz-0.055, lx+0.055, 0.03, lz+0.055, {top:'#f8fafc', side1:'#edf2f7', side2:'#edf2f7', stroke:'#475569'}); addBoxPoints(lx-0.055, 0.0, lz-0.055, lx+0.055, 0.03, lz+0.055);
+            pushOverlayLine(primitives, p(lx,0.02,lz), p(lx,hNum - deckThickness,lz), '#334155', 3.2);
+            pushMarker(primitives, p(lx,0.02,lz), 'foot', '', 5);
+        });
+
+        railings.forEach(r => {
+            const railOffset = 0.03;
+            const topY = hNum + 1.0;
+            const midY = hNum + 0.55;
+            if(r.orient === 'H') {
+                const z = r.fixed + (r.side === 'top' ? -railOffset : railOffset);
+                const xs = (r.end-r.start) > 1.2 ? [r.start, (r.start+r.end)/2, r.end] : [r.start, r.end];
+                xs.forEach(x => { pushLine(primitives, p(x,hNum,z), p(x,topY,z), '#111111', 2.2); });
+                pushLine(primitives, p(r.start,topY,z), p(r.end,topY,z), '#111111', 2.6);
+                pushLine(primitives, p(r.start,midY,z), p(r.end,midY,z), '#111111', 2.1);
+            } else {
+                const x = r.fixed + (r.side === 'left' ? -railOffset : railOffset);
+                const zs = (r.end-r.start) > 1.2 ? [r.start, (r.start+r.end)/2, r.end] : [r.start, r.end];
+                zs.forEach(z => { pushLine(primitives, p(x,hNum,z), p(x,topY,z), '#111111', 2.2); });
+                pushLine(primitives, p(x,topY,r.start), p(x,topY,r.end), '#111111', 2.6);
+                pushLine(primitives, p(x,midY,r.start), p(x,midY,r.end), '#111111', 2.1);
+            }
+        });
+
+        // Маркеры фурнитуры в 3D: СОп60, СП-01-АБ, ГВПв, СПП-А.
+        // Это не точная заводская 3D-модель детали, а технические обозначения на схеме.
+        const edgeMap3D = {};
+        platforms.forEach(pl => {
+            for(let dx=0; dx<pl.w; dx+=0.5) {
+                edgeMap3D[`${pl.x+dx},${pl.y},H`] = (edgeMap3D[`${pl.x+dx},${pl.y},H`]||0)+1;
+                edgeMap3D[`${pl.x+dx},${pl.y+pl.h},H`] = (edgeMap3D[`${pl.x+dx},${pl.y+pl.h},H`]||0)+1;
+            }
+            for(let dz=0; dz<pl.h; dz+=0.5) {
+                edgeMap3D[`${pl.x},${pl.y+dz},V`] = (edgeMap3D[`${pl.x},${pl.y+dz},V`]||0)+1;
+                edgeMap3D[`${pl.x+pl.w},${pl.y+dz},V`] = (edgeMap3D[`${pl.x+pl.w},${pl.y+dz},V`]||0)+1;
+            }
+        });
+
+        Object.values(nodes).forEach(n => {
+            const nx = n.x, nz = n.z;
+            const e1 = edgeMap3D[`${nx},${nz},H`], e2 = edgeMap3D[`${nx-0.5},${nz},H`];
+            const e3 = edgeMap3D[`${nx},${nz},V`], e4 = edgeMap3D[`${nx},${nz-0.5},V`];
+            const isPerim = ((e1||0)===1 || (e2||0)===1 || (e3||0)===1 || (e4||0)===1);
+            if(n.count > 1) {
+                if(hNum >= 1.2 || (hNum >= 0.4 && n.count === 3)) {
+                    pushMarker(primitives, p(nx, Math.min(hNum-0.10, 0.55), nz), 'clamp2', 'СОп60×2', 8);
+                } else if(hNum >= 0.4 && n.count === 2 && isPerim) {
+                    pushMarker(primitives, p(nx, Math.min(hNum-0.10, 0.55), nz), 'clamp1', 'СОп60', 7);
+                }
+            }
+        });
+
+        for(let i=0; i<platforms.length; i++) {
+            for(let j=i+1; j<platforms.length; j++) {
+                const p1 = platforms[i], p2 = platforms[j];
+                let joint = null;
+                if(Math.abs(p1.y + p1.h - p2.y) < 0.01 || Math.abs(p2.y + p2.h - p1.y) < 0.01) {
+                    let s = Math.max(p1.x, p2.x), e = Math.min(p1.x+p1.w, p2.x+p2.w);
+                    if(e > s) joint = { type:'H', fixed:(Math.abs(p1.y + p1.h - p2.y) < 0.01 ? p1.y+p1.h : p2.y+p2.h), s, e, l:e-s };
+                } else if(Math.abs(p1.x + p1.w - p2.x) < 0.01 || Math.abs(p2.x + p2.w - p1.x) < 0.01) {
+                    let s = Math.max(p1.y, p2.y), e = Math.min(p1.y+p1.h, p2.y+p2.h);
+                    if(e > s) joint = { type:'V', fixed:(Math.abs(p1.x + p1.w - p2.x) < 0.01 ? p1.x+p1.w : p2.x+p2.w), s, e, l:e-s };
+                }
+                if(joint) {
+                    const ins1 = joint.s + joint.l * 0.2;
+                    const ins2 = joint.s + joint.l * 0.8;
+                    if(joint.type === 'H') {
+                        pushMarker(primitives, p(ins1, hNum + 0.025, joint.fixed), 'insert', 'ГВПв', 6);
+                        pushMarker(primitives, p(ins2, hNum + 0.025, joint.fixed), 'insert', 'ГВПв', 6);
+                    } else {
+                        pushMarker(primitives, p(joint.fixed, hNum + 0.025, ins1), 'insert', 'ГВПв', 6);
+                        pushMarker(primitives, p(joint.fixed, hNum + 0.025, ins2), 'insert', 'ГВПв', 6);
+                    }
+                    const spCount = (joint.l > 1.0 || (document.getElementById('doubt-toggle') && document.getElementById('doubt-toggle').checked)) ? 2 : 1;
+                    const connPositions = spCount === 1 ? [joint.s + joint.l * 0.5] : [joint.s + joint.l * 0.35, joint.s + joint.l * 0.65];
+                    connPositions.forEach(pos => {
+                        if(joint.type === 'H') pushMarker(primitives, p(pos, hNum + 0.035, joint.fixed), 'connector', 'СП-01-АБ', 7);
+                        else pushMarker(primitives, p(joint.fixed, hNum + 0.035, pos), 'connector', 'СП-01-АБ', 7);
+                    });
+                }
+            }
+        }
+
+        railings.forEach(r => {
+            const y = hNum + 0.28;
+            if(r.orient === 'H') {
+                const z = r.fixed + (r.side === 'top' ? -0.03 : 0.03);
+                pushMarker(primitives, p(r.start, y, z), 'railClamp', r.bracket || 'Кр.ППл', 6);
+                pushMarker(primitives, p(r.end, y, z), 'railClamp', r.bracket || 'Кр.ППл', 6);
+            } else {
+                const x = r.fixed + (r.side === 'left' ? -0.03 : 0.03);
+                pushMarker(primitives, p(x, y, r.start), 'railClamp', r.bracket || 'Кр.ППл', 6);
+                pushMarker(primitives, p(x, y, r.end), 'railClamp', r.bracket || 'Кр.ППл', 6);
+            }
+        });
+
+        // 3D-маркеры соединителей между секциями перил.
+        const railHw3D = getRailHardwareSummary();
+        Object.entries(railHw3D.points).forEach(([key, items]) => {
+            if(items.length < 2) return;
+            const [x,z] = key.split(',').map(Number);
+            pushMarker(primitives, p(x, hNum + 0.86, z), 'railJoiner', 'СППл', 7);
+        });
+
+
+        stairs.forEach(st => {
+            const steps = st.steps || Math.max(3, Math.round(hNum / 0.2));
+            const rise = hNum / steps;
+            const totalDepth = st.depth || 0.9;
+            const tread = totalDepth / steps;
+            const treadThickness = Math.max(0.03, Math.min(0.055, rise * 0.28));
+
+            const railTopBottom = 0.92;
+            const railTopUpper = hNum + 1.05;
+            const railMidBottom = 0.46;
+            const railMidUpper = hNum + 0.56;
+
+            const width = Math.abs((st.end - st.start) || 1);
+            const sideInset = Math.min(0.11, Math.max(0.05, width * 0.08));
+            const treadInset = Math.min(0.09, Math.max(0.035, width * 0.06));
+            const postCount = Math.max(4, Math.min(6, steps + 1));
+            const topAttachLen = 0.16;
+            const topAttachDrop = Math.max(0.11, Math.min(0.18, hNum * 0.12));
+            const groundPlateLen = 0.12;
+
+            const tToStepY = (t) => {
+                const stepIndex = Math.max(0, Math.min(steps, Math.round(t * steps)));
+                return Math.min(hNum, rise * stepIndex);
+            };
+            const lerp = (a, b, t) => a + (b - a) * t;
+
+            if(st.orient === 'H') {
+                const dir = st.side === 'top' ? -1 : 1;
+                const zOuter = st.fixed + dir * totalDepth;
+                const stepX1 = st.start + treadInset;
+                const stepX2 = st.end - treadInset;
+                const sideXs = [st.start + sideInset, st.end - sideInset];
+                const stringerBottomZ = zOuter - dir * 0.02;
+                const stringerTopZ = st.fixed + dir * 0.03;
+                const stringerTopY = Math.max(0.08, hNum - 0.10);
+
+                for(let i=0;i<steps;i++) {
+                    const yTop = rise * (i + 1);
+                    const yBot = Math.max(0, yTop - treadThickness);
+                    const z1 = zOuter - dir * tread * i;
+                    const z2 = zOuter - dir * tread * (i + 1);
+                    pushBox(primitives, stepX1, yBot, Math.min(z1,z2), stepX2, yTop, Math.max(z1,z2), {top:'rgba(255,255,255,.36)', side1:'rgba(251,191,36,.14)', side2:'rgba(251,191,36,.10)', stroke:'#7c2d12'});
+                    addBoxPoints(stepX1, yBot, Math.min(z1,z2), stepX2, yTop, Math.max(z1,z2));
+                }
+
+                sideXs.forEach(x => {
+                    // Нижняя тетива / косоур лестницы.
+                    pushLine(primitives, p(x, 0.04, stringerBottomZ), p(x, stringerTopY, stringerTopZ), '#111111', 2.6);
+                    pushLine(primitives, p(x, 0.14, stringerBottomZ - dir * 0.05), p(x, stringerTopY + 0.08, stringerTopZ + dir * 0.05), '#111111', 1.6);
+
+                    // Крепление к земле.
+                    pushLine(primitives, p(x, 0.02, stringerBottomZ), p(x, 0.02, stringerBottomZ - dir * groundPlateLen), '#111111', 2.0);
+                    pushLine(primitives, p(x, 0.02, stringerBottomZ), p(x, 0.12, stringerBottomZ - dir * 0.06), '#111111', 1.6);
+
+                    // Крепление к платформе.
+                    pushLine(primitives, p(x, hNum - topAttachDrop, st.fixed + dir * 0.07), p(x, hNum, st.fixed), '#111111', 1.9);
+                    pushLine(primitives, p(x, hNum - topAttachDrop, st.fixed + dir * 0.07), p(x, hNum - topAttachDrop, st.fixed - dir * topAttachLen), '#111111', 1.6);
+                    pushLine(primitives, p(x, hNum - topAttachDrop, st.fixed - dir * topAttachLen), p(x, hNum - 0.02, st.fixed - dir * topAttachLen), '#111111', 1.5);
+
+                    // Перила.
+                    pushLine(primitives, p(x, railTopBottom, zOuter), p(x, railTopUpper, st.fixed), '#111111', 2.8);
+                    pushLine(primitives, p(x, railMidBottom, zOuter), p(x, railMidUpper, st.fixed), '#111111', 2.0);
+
+                    for(let j=0; j<postCount; j++) {
+                        const t = postCount === 1 ? 0 : j / (postCount - 1);
+                        const z = lerp(zOuter, st.fixed, t);
+                        const yBase = tToStepY(t) + treadThickness * 0.35;
+                        const yMid = lerp(railMidBottom, railMidUpper, t);
+                        const yTop = lerp(railTopBottom, railTopUpper, t);
+
+                        pushLine(primitives, p(x, yBase, z), p(x, yTop, z), '#111111', 1.9);
+                        pushLine(primitives, p(x, yMid, z), p(x, yTop, z), '#111111', 1.35);
+                    }
+                });
+            } else {
+                const dir = st.side === 'left' ? -1 : 1;
+                const xOuter = st.fixed + dir * totalDepth;
+                const stepZ1 = st.start + treadInset;
+                const stepZ2 = st.end - treadInset;
+                const sideZs = [st.start + sideInset, st.end - sideInset];
+                const stringerBottomX = xOuter - dir * 0.02;
+                const stringerTopX = st.fixed + dir * 0.03;
+                const stringerTopY = Math.max(0.08, hNum - 0.10);
+
+                for(let i=0;i<steps;i++) {
+                    const yTop = rise * (i + 1);
+                    const yBot = Math.max(0, yTop - treadThickness);
+                    const x1 = xOuter - dir * tread * i;
+                    const x2 = xOuter - dir * tread * (i + 1);
+                    pushBox(primitives, Math.min(x1,x2), yBot, stepZ1, Math.max(x1,x2), yTop, stepZ2, {top:'rgba(255,255,255,.36)', side1:'rgba(251,191,36,.14)', side2:'rgba(251,191,36,.10)', stroke:'#7c2d12'});
+                    addBoxPoints(Math.min(x1,x2), yBot, stepZ1, Math.max(x1,x2), yTop, stepZ2);
+                }
+
+                sideZs.forEach(z => {
+                    // Нижняя тетива / косоур лестницы.
+                    pushLine(primitives, p(stringerBottomX, 0.04, z), p(stringerTopX, stringerTopY, z), '#111111', 2.6);
+                    pushLine(primitives, p(stringerBottomX - dir * 0.05, 0.14, z), p(stringerTopX + dir * 0.05, stringerTopY + 0.08, z), '#111111', 1.6);
+
+                    // Крепление к земле.
+                    pushLine(primitives, p(stringerBottomX, 0.02, z), p(stringerBottomX - dir * groundPlateLen, 0.02, z), '#111111', 2.0);
+                    pushLine(primitives, p(stringerBottomX, 0.02, z), p(stringerBottomX - dir * 0.06, 0.12, z), '#111111', 1.6);
+
+                    // Крепление к платформе.
+                    pushLine(primitives, p(st.fixed + dir * 0.07, hNum - topAttachDrop, z), p(st.fixed, hNum, z), '#111111', 1.9);
+                    pushLine(primitives, p(st.fixed + dir * 0.07, hNum - topAttachDrop, z), p(st.fixed - dir * topAttachLen, hNum - topAttachDrop, z), '#111111', 1.6);
+                    pushLine(primitives, p(st.fixed - dir * topAttachLen, hNum - topAttachDrop, z), p(st.fixed - dir * topAttachLen, hNum - 0.02, z), '#111111', 1.5);
+
+                    // Перила.
+                    pushLine(primitives, p(xOuter, railTopBottom, z), p(st.fixed, railTopUpper, z), '#111111', 2.8);
+                    pushLine(primitives, p(xOuter, railMidBottom, z), p(st.fixed, railMidUpper, z), '#111111', 2.0);
+
+                    for(let j=0; j<postCount; j++) {
+                        const t = postCount === 1 ? 0 : j / (postCount - 1);
+                        const x = lerp(xOuter, st.fixed, t);
+                        const yBase = tToStepY(t) + treadThickness * 0.35;
+                        const yMid = lerp(railMidBottom, railMidUpper, t);
+                        const yTop = lerp(railTopBottom, railTopUpper, t);
+
+                        pushLine(primitives, p(x, yBase, z), p(x, yTop, z), '#111111', 1.9);
+                        pushLine(primitives, p(x, yMid, z), p(x, yTop, z), '#111111', 1.35);
+                    }
+                });
+            }
+        });
+
+        const reinf = getReinforcementRuns();
+        const allDiagonals = reinf.diagonals.concat(reinforcements.filter(r=>r.kind==='diagonal'));
+        const allFrames = reinf.frames.concat(reinforcements.filter(r=>r.kind==='frame'));
+        allDiagonals.forEach(r => {
+            const offset = 0.05;
+            const braceBottom = 0.32;
+            const braceTop = Math.max(1.32, hNum - 0.08);
+            if(r.orient === 'H') {
+                const z = r.fixed + (r.side === 'top' ? -offset : offset);
+                pushLine(primitives, p(r.start, braceBottom, z), p(r.end, braceTop, z), '#111111', 3.4);
+                pushLine(primitives, p(r.end, braceBottom, z), p(r.start, braceTop, z), '#111111', 3.4);
+                pushLine(primitives, p(r.start, braceBottom, z), p(r.end, braceBottom, z), '#111111', 2.3);
+                pushLine(primitives, p(r.start, braceTop, z), p(r.end, braceTop, z), '#111111', 2.3);
+                pushLine(primitives, p(r.start, 0.02, z), p(r.start, braceTop, z), '#111111', 2.3);
+                pushLine(primitives, p(r.end, 0.02, z), p(r.end, braceTop, z), '#111111', 2.3);
+                if(hNum >= 1.8 && hNum <= 2.2) pushLine(primitives, p((r.start+r.end)/2, 0.02, z), p((r.start+r.end)/2, braceTop, z), '#111111', 2.3);
+            } else {
+                const x = r.fixed + (r.side === 'left' ? -offset : offset);
+                pushLine(primitives, p(x, braceBottom, r.start), p(x, braceTop, r.end), '#111111', 3.4);
+                pushLine(primitives, p(x, braceBottom, r.end), p(x, braceTop, r.start), '#111111', 3.4);
+                pushLine(primitives, p(x, braceBottom, r.start), p(x, braceBottom, r.end), '#111111', 2.3);
+                pushLine(primitives, p(x, braceTop, r.start), p(x, braceTop, r.end), '#111111', 2.3);
+                pushLine(primitives, p(x, 0.02, r.start), p(x, braceTop, r.start), '#111111', 2.3);
+                pushLine(primitives, p(x, 0.02, r.end), p(x, braceTop, r.end), '#111111', 2.3);
+                if(hNum >= 1.8 && hNum <= 2.2) pushLine(primitives, p(x, 0.02, (r.start+r.end)/2), p(x, braceTop, (r.start+r.end)/2), '#111111', 2.3);
+            }
+        });
+
+
+        allFrames.forEach(r => {
+            const offset = 0.08;
+            const topY = Math.max(1.65, hNum - 0.05);
+            if(r.orient === 'H') {
+                const z = r.fixed + (r.side === 'top' ? -offset : offset);
+                pushLine(primitives, p(r.start,0.05,z), p(r.end,0.05,z), '#7c2d12', 3.0);
+                pushLine(primitives, p(r.start,topY,z), p(r.end,topY,z), '#7c2d12', 3.0);
+                pushLine(primitives, p(r.start,0.05,z), p(r.start,topY,z), '#7c2d12', 3.0);
+                pushLine(primitives, p(r.end,0.05,z), p(r.end,topY,z), '#7c2d12', 3.0);
+                pushLine(primitives, p(r.start,0.05,z), p(r.end,topY,z), '#7c2d12', 2.5);
+                pushLine(primitives, p(r.end,0.05,z), p(r.start,topY,z), '#7c2d12', 2.5);
+            } else {
+                const x = r.fixed + (r.side === 'left' ? -offset : offset);
+                pushLine(primitives, p(x,0.05,r.start), p(x,0.05,r.end), '#7c2d12', 3.0);
+                pushLine(primitives, p(x,topY,r.start), p(x,topY,r.end), '#7c2d12', 3.0);
+                pushLine(primitives, p(x,0.05,r.start), p(x,topY,r.start), '#7c2d12', 3.0);
+                pushLine(primitives, p(x,0.05,r.end), p(x,topY,r.end), '#7c2d12', 3.0);
+                pushLine(primitives, p(x,0.05,r.start), p(x,topY,r.end), '#7c2d12', 2.5);
+                pushLine(primitives, p(x,0.05,r.end), p(x,topY,r.start), '#7c2d12', 2.5);
+            }
+        });
+
+        return { primitives, points };
+    }
+
+    function fit3DToCanvas(resetPan=true) {
+        if(!viewer3DState.canvas || viewer3DState.points.length === 0) return;
+        const w = viewer3DState.canvas.width, h = viewer3DState.canvas.height;
+        let minX=Infinity, maxX=-Infinity, minY=Infinity, maxY=-Infinity;
+        viewer3DState.points.forEach(pt => {
+            const r = rotatePoint(pt);
+            minX = Math.min(minX, r.x); maxX = Math.max(maxX, r.x);
+            minY = Math.min(minY, r.y); maxY = Math.max(maxY, r.y);
+        });
+        const spanX = Math.max(0.1, maxX - minX), spanY = Math.max(0.1, maxY - minY);
+        viewer3DState.zoom = Math.min((w - 80) / spanX, (h - 80) / spanY);
+        viewer3DState.zoom = Math.max(20, Math.min(420, viewer3DState.zoom));
+        if(resetPan) {
+            viewer3DState.panX = -(minX + maxX) / 2 * viewer3DState.zoom;
+            viewer3DState.panY = (minY + maxY) / 2 * viewer3DState.zoom;
+        }
+    }
+
+    function render3DScene() {
+        if(!viewer3DState.canvas) return;
+        const canvas = viewer3DState.canvas;
+        const ctx = viewer3DState.ctx;
+        if(platforms.length === 0) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#334155';
+            ctx.font = '700 18px Inter, sans-serif';
+            ctx.fillText('Сначала соберите подиум в 2D.', 24, 40);
+            return;
+        }
+
+        const data = build3DData();
+        viewer3DState.points = data.points;
+        const xs = data.points.map(p=>p.x), ys = data.points.map(p=>p.y), zs = data.points.map(p=>p.z);
+        viewer3DState.center = {
+            x: (Math.min(...xs) + Math.max(...xs)) / 2,
+            y: (Math.min(...ys) + Math.max(...ys)) / 2,
+            z: (Math.min(...zs) + Math.max(...zs)) / 2
+        };
+        viewer3DState.bounds = {
+            minX: Math.min(...xs), maxX: Math.max(...xs),
+            minY: Math.min(...ys), maxY: Math.max(...ys),
+            minZ: Math.min(...zs), maxZ: Math.max(...zs)
+        };
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#f8fafc';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        const normalItems = data.primitives.filter(x => x.type !== 'overlayLine' && x.type !== 'marker').sort((a,b) => a.depth - b.depth);
+        const overlayItems = data.primitives.filter(x => x.type === 'overlayLine' || x.type === 'marker').sort((a,b) => a.depth - b.depth);
+
+        function drawItem(item) {
+            if(item.type === 'face') {
+                const pts = item.pts.map(projectPoint);
+                ctx.beginPath();
+                ctx.moveTo(pts[0].x, pts[0].y);
+                for(let i=1;i<pts.length;i++) ctx.lineTo(pts[i].x, pts[i].y);
+                ctx.closePath();
+                ctx.fillStyle = item.fill;
+                ctx.fill();
+                ctx.lineWidth = item.lineWidth;
+                ctx.strokeStyle = item.stroke;
+                ctx.stroke();
+            } else if(item.type === 'line' || item.type === 'overlayLine') {
+                const a = projectPoint(item.a), b = projectPoint(item.b);
+                ctx.beginPath();
+                ctx.moveTo(a.x, a.y);
+                ctx.lineTo(b.x, b.y);
+                ctx.lineWidth = item.lineWidth;
+                ctx.strokeStyle = item.stroke;
+                ctx.lineCap = 'round';
+                ctx.stroke();
+            } else if(item.type === 'marker') {
+                const q = projectPoint(item.p);
+                const s = item.size || 7;
+                ctx.save();
+                ctx.lineWidth = 1.6;
+                ctx.font = '700 9px Inter, Arial, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'top';
+                if(item.kind === 'connector') {
+                    ctx.strokeStyle = '#2563eb';
+                    ctx.fillStyle = 'rgba(37,99,235,.10)';
+                    ctx.strokeRect(q.x-s/2, q.y-s/2, s, s);
+                    ctx.beginPath(); ctx.moveTo(q.x-s/2, q.y+s/2); ctx.lineTo(q.x+s/2, q.y+s/2); ctx.stroke();
+                } else if(item.kind === 'insert') {
+                    ctx.fillStyle = '#10b981';
+                    ctx.fillRect(q.x-s, q.y-s/3, s*2, s*0.66);
+                } else if(item.kind === 'clamp1' || item.kind === 'clamp2') {
+                    ctx.strokeStyle = '#111111';
+                    ctx.fillStyle = 'rgba(255,255,255,.80)';
+                    ctx.strokeRect(q.x-s/2, q.y-s/2, s, s);
+                    ctx.strokeStyle = '#ef4444';
+                    ctx.beginPath();
+                    ctx.moveTo(q.x-s/2, q.y-s/2); ctx.lineTo(q.x+s/2, q.y+s/2);
+                    ctx.moveTo(q.x+s/2, q.y-s/2); ctx.lineTo(q.x-s/2, q.y+s/2);
+                    ctx.stroke();
+                    if(item.kind === 'clamp2') {
+                        ctx.strokeStyle = '#111111';
+                        ctx.strokeRect(q.x+s*0.75, q.y-s/2, s, s);
+                        ctx.strokeStyle = '#ef4444';
+                        ctx.beginPath();
+                        ctx.moveTo(q.x+s*0.75, q.y-s/2); ctx.lineTo(q.x+s*1.75, q.y+s/2);
+                        ctx.moveTo(q.x+s*1.75, q.y-s/2); ctx.lineTo(q.x+s*0.75, q.y+s/2);
+                        ctx.stroke();
+                    }
+                } else if(item.kind === 'railClamp') {
+                    ctx.fillStyle = '#111111';
+                    ctx.beginPath(); ctx.arc(q.x, q.y, s*0.45, 0, Math.PI*2); ctx.fill();
+                    ctx.strokeStyle = '#ef4444';
+                    ctx.beginPath(); ctx.moveTo(q.x-s*0.6,q.y); ctx.lineTo(q.x+s*0.6,q.y); ctx.moveTo(q.x,q.y-s*0.6); ctx.lineTo(q.x,q.y+s*0.6); ctx.stroke();
+                } else if(item.kind === 'railJoiner') {
+                    ctx.fillStyle = '#facc15';
+                    ctx.strokeStyle = '#713f12';
+                    ctx.beginPath();
+                    ctx.rect(q.x-s/1.4, q.y-s/3, s*1.4, s*0.66);
+                    ctx.fill(); ctx.stroke();
+                } else if(item.kind === 'foot') {
+                    ctx.strokeStyle = '#475569';
+                    ctx.strokeRect(q.x-s/2, q.y-s/2, s, s);
+                }
+                // Подписи показываем только для ключевой фурнитуры, чтобы 3D не превратился в кашу.
+                if(item.label && ['connector','insert','clamp1','clamp2','railClamp'].includes(item.kind)) {
+                    ctx.fillStyle = '#0f172a';
+                    ctx.fillText(item.label, q.x, q.y + s + 2);
+                }
+                ctx.restore();
+            }
+        }
+
+        normalItems.forEach(drawItem);
+        overlayItems.forEach(drawItem);
+
+        if(viewer3DState.hoverSpan && viewer3DState.editMode !== 'orbit') {
+            const [a3,b3] = spanEndPoints3D(viewer3DState.hoverSpan);
+            const a = projectPoint(a3), b = projectPoint(b3);
+            ctx.save();
+            ctx.strokeStyle = viewer3DState.editMode === 'frame' ? '#7c2d12' : '#0ea5e9';
+            ctx.lineWidth = 6;
+            ctx.setLineDash([10, 7]);
+            ctx.beginPath();
+            ctx.moveTo(a.x,a.y);
+            ctx.lineTo(b.x,b.y);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.fillStyle = 'rgba(14,165,233,.12)';
+            ctx.beginPath();
+            ctx.arc(a.x,a.y,7,0,Math.PI*2);
+            ctx.arc(b.x,b.y,7,0,Math.PI*2);
+            ctx.fill();
+            ctx.restore();
+        }
+
+        ctx.fillStyle = '#0f172a';
+        ctx.font = '700 16px Inter, sans-serif';
+        ctx.fillText(`Высота: ${parseFloat(document.getElementById('h-input').value || '0.8').toFixed(1)} м`, 18, 28);
+        ctx.font = '600 13px Inter, sans-serif';
+        ctx.fillText(`Платформ: ${platforms.length} · Перил: ${railings.length} · Лестниц: ${stairs.length}`, 18, 48);
+    }
+
+    function set3DView(mode='iso') {
+        if(mode === 'front') {
+            viewer3DState.yaw = 0;
+            viewer3DState.pitch = 0.18;
+        } else if(mode === 'side') {
+            viewer3DState.yaw = Math.PI / 2;
+            viewer3DState.pitch = 0.18;
+        } else if(mode === 'top') {
+            viewer3DState.yaw = 0;
+            viewer3DState.pitch = Math.PI / 2 - 0.03;
+        } else {
+            viewer3DState.yaw = -Math.PI / 4;
+            viewer3DState.pitch = 0.62;
+        }
+        render3DScene();
+        fit3DToCanvas(true);
+        render3DScene();
+    }
+
+    function get3DSnapshot(mode, title, width=760, height=460, zoomBoost=1, fillMode='contain') {
+        ensure3DCanvas();
+        const canvas = viewer3DState.canvas;
+        const old = {
+            w: canvas.width, h: canvas.height,
+            yaw: viewer3DState.yaw, pitch: viewer3DState.pitch,
+            zoom: viewer3DState.zoom, panX: viewer3DState.panX, panY: viewer3DState.panY
+        };
+
+        canvas.width = width;
+        canvas.height = height;
+        set3DView(mode);
+
+        if(zoomBoost && zoomBoost !== 1) {
+            viewer3DState.zoom *= zoomBoost;
+            render3DScene();
+        }
+
+        const projected = viewer3DState.points.map(projectPoint).filter(p => Number.isFinite(p.x) && Number.isFinite(p.y));
+        let dataUrl;
+
+        if(projected.length) {
+            let minX = Math.min(...projected.map(p=>p.x));
+            let maxX = Math.max(...projected.map(p=>p.x));
+            let minY = Math.min(...projected.map(p=>p.y));
+            let maxY = Math.max(...projected.map(p=>p.y));
+
+            const pad = fillMode === 'cover'
+                ? Math.max(2, Math.round(Math.min(width, height) * 0.004))
+                : Math.max(14, Math.round(Math.min(width, height) * 0.018));
+
+            minX = Math.max(0, Math.floor(minX - pad));
+            minY = Math.max(0, Math.floor(minY - pad));
+            maxX = Math.min(canvas.width, Math.ceil(maxX + pad));
+            maxY = Math.min(canvas.height, Math.ceil(maxY + pad));
+
+            const srcW = Math.max(10, maxX - minX);
+            const srcH = Math.max(10, maxY - minY);
+
+            const out = document.createElement('canvas');
+            out.width = width;
+            out.height = height;
+            const octx = out.getContext('2d');
+            octx.fillStyle = '#f8fafc';
+            octx.fillRect(0, 0, out.width, out.height);
+
+            const scale = fillMode === 'cover'
+                ? Math.max(out.width / srcW, out.height / srcH)
+                : Math.min(out.width / srcW, out.height / srcH);
+
+            const dstW = srcW * scale;
+            const dstH = srcH * scale;
+            const dstX = (out.width - dstW) / 2;
+            const dstY = (out.height - dstH) / 2;
+
+            octx.imageSmoothingEnabled = true;
+            octx.imageSmoothingQuality = 'high';
+            octx.drawImage(canvas, minX, minY, srcW, srcH, dstX, dstY, dstW, dstH);
+            dataUrl = out.toDataURL('image/png');
+        } else {
+            dataUrl = canvas.toDataURL('image/png');
+        }
+
+        canvas.width = old.w;
+        canvas.height = old.h;
+        viewer3DState.yaw = old.yaw;
+        viewer3DState.pitch = old.pitch;
+        viewer3DState.zoom = old.zoom;
+        viewer3DState.panX = old.panX;
+        viewer3DState.panY = old.panY;
+        render3DScene();
+
+        return { title, dataUrl };
+    }
+
+    function renderPrint3DViews() {
+        const cells = {
+            iso: document.getElementById('p-3d-iso'),
+            front: document.getElementById('p-3d-front'),
+            side: document.getElementById('p-3d-side'),
+            top: document.getElementById('p-3d-top')
+        };
+        if(!cells.iso) return;
+
+        if(platforms.length === 0) {
+            Object.values(cells).forEach(cell => {
+                if(cell) cell.innerHTML = '<div class="print-3d-placeholder">Сначала соберите подиум</div>';
+            });
+            return;
+        }
+
+        const views = {
+            iso: get3DSnapshot('iso', 'Изометрия', 900, 520, 1.0, 'contain'),
+            front: get3DSnapshot('front', 'Вид спереди', 900, 520, 1.0, 'contain'),
+            side: get3DSnapshot('side', 'Вид сбоку', 900, 520, 1.0, 'contain'),
+            top: get3DSnapshot('top', 'Вид сверху', 900, 520, 1.0, 'contain')
+        };
+
+        Object.entries(views).forEach(([key, view]) => {
+            const cell = cells[key];
+            if(cell) cell.innerHTML = `<img src="${view.dataUrl}" alt="${view.title}">`;
+        });
+    }
+
+    function preparePrintAndPrint() {
+        updateAll();
+        renderPrint3DViews();
+        setTimeout(() => window.print(), 120);
+    }
+
+</script>
+</body>
+</html>
