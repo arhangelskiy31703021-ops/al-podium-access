@@ -1824,11 +1824,11 @@
         <div class="legend-box">
             <div class="legend-item">
                 <div class="legend-icon-wrap" id="leg-clamp-2"></div>
-                <span>СОп60 (2 шт.) - Усиление / Высокий</span>
+                <span>СОп60 (2 шт.) - узел 3–4 опоры</span>
             </div>
             <div class="legend-item">
                 <div class="legend-icon-wrap" id="leg-clamp-1"></div>
-                <span>СОп60 (1 шт.) - Периферия / Средний</span>
+                <span>СОп60 (1 шт.) - узел 2 опоры</span>
             </div>
             <div class="legend-item">
                 <div class="legend-icon-wrap" id="leg-conn"></div>
@@ -1978,8 +1978,8 @@
     // 1) Создайте проект Supabase.
     // 2) Вставьте сюда Project URL и anon/public key из Project Settings > API.
     // 3) Выполните SQL из файла al_podium_supabase_setup.sql.
-    const SUPABASE_URL = 'https://rbnytcuehmgseaytptwi.supabase.co';
-    const SUPABASE_ANON_KEY = 'sb_publishable_3D0cPQ94FDaf4wrbDuqCiw_v1Bvr56i';
+    const SUPABASE_URL = 'https://cbfkjeupbqisdqdskvqc.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_Z1X7B_bvZFMMgqzHwzwedg_OvMlbD3u';
     let supabaseClient = null;
 
     function isSupabaseConfigured() {
@@ -2285,6 +2285,18 @@
         return isExactlyOneMeter
             ? {...SUPPORT_TYPES.fixed, mode:'fixed', auto:true}
             : {...SUPPORT_TYPES.telescopic, mode:'telescopic', auto:true};
+    }
+
+
+    function getSupportClampKind(sharedCount, hNum) {
+        // Струбцины опор СОп60 считаем по количеству фактических ног в узле.
+        // 1 нога -> 0; 2 ноги -> 1; 3 ноги -> 2; 4 ноги -> 2 только на высоте >= 1.2 м.
+        if(sharedCount <= 1) return 0;
+        if(hNum < 0.4) return 0;
+        if(sharedCount === 2) return 1;
+        if(sharedCount === 3) return 2;
+        if(sharedCount >= 4) return hNum >= 1.2 ? 2 : 0;
+        return 0;
     }
 
     const STAIR_PRESETS = [
@@ -3623,18 +3635,36 @@
             }
         });
 
-        if (showPerim && platforms.length > 0 && maxX > minX && maxY > minY) {
-            let rectX = minX + 0.5, rectY = minY + 0.5, rectW = (maxX - minX) - 1.0, rectH = (maxY - minY) - 1.0;
-            let frame = document.createElement('div');
-            frame.style.position = 'absolute'; frame.style.left = (rectX * GRID + 2500) + 'px'; frame.style.top = (rectY * GRID + 2500) + 'px';
-            frame.style.width = (rectW * GRID) + 'px'; frame.style.height = (rectH * GRID) + 'px'; frame.style.zIndex = '12'; frame.style.pointerEvents = 'none';
-            let svgHTML = `<svg width="100%" height="100%" style="position:absolute; top:0; left:0; pointer-events:none; overflow:visible;">`;
-            let dash = "24, 16";
-            if (rectW > 0 && rectH > 0) svgHTML += `<rect x="0" y="0" width="100%" height="100%" fill="none" stroke="var(--danger)" stroke-width="3" stroke-dasharray="${dash}" />`;
-            else if (rectW > 0 && rectH === 0) svgHTML += `<line x1="0" y1="0" x2="100%" y2="0" stroke="var(--danger)" stroke-width="3" stroke-dasharray="${dash}" />`;
-            else if (rectW === 0 && rectH > 0) svgHTML += `<line x1="0" y1="0" x2="0" y2="100%" stroke="var(--danger)" stroke-width="3" stroke-dasharray="${dash}" />`;
-            svgHTML += `</svg>`; frame.innerHTML = svgHTML;
-            if (rectW >= 0 && rectH >= 0) perimLayer.appendChild(frame);
+        if (showPerim && platforms.length > 0) {
+            const dash = "24, 16";
+            Object.entries(edges).forEach(([key, count]) => {
+                if(count !== 1) return; // рисуем только реальные наружные рёбра, не bounding-box
+                const [xRaw, yRaw, orient] = key.split(',');
+                const x = Number(xRaw);
+                const y = Number(yRaw);
+                if(!Number.isFinite(x) || !Number.isFinite(y)) return;
+
+                const seg = document.createElement('div');
+                seg.style.position = 'absolute';
+                seg.style.left = (x * GRID + 2500) + 'px';
+                seg.style.top = (y * GRID + 2500) + 'px';
+                seg.style.zIndex = '12';
+                seg.style.pointerEvents = 'none';
+                seg.style.overflow = 'visible';
+
+                if(orient === 'H') {
+                    seg.style.width = (0.5 * GRID) + 'px';
+                    seg.style.height = '1px';
+                    seg.innerHTML = `<svg width="${0.5 * GRID}" height="8" style="position:absolute;left:0;top:-4px;overflow:visible;"><line x1="0" y1="4" x2="${0.5 * GRID}" y2="4" stroke="var(--danger)" stroke-width="3" stroke-dasharray="${dash}" stroke-linecap="round"/></svg>`;
+                } else if(orient === 'V') {
+                    seg.style.width = '1px';
+                    seg.style.height = (0.5 * GRID) + 'px';
+                    seg.innerHTML = `<svg width="8" height="${0.5 * GRID}" style="position:absolute;left:-4px;top:0;overflow:visible;"><line x1="4" y1="0" x2="4" y2="${0.5 * GRID}" stroke="var(--danger)" stroke-width="3" stroke-dasharray="${dash}" stroke-linecap="round"/></svg>`;
+                } else {
+                    return;
+                }
+                perimLayer.appendChild(seg);
+            });
         }
 
         let nodes = {};
@@ -3651,15 +3681,13 @@
             let sharedCount = nodes[key].count;
             const leg = document.createElement('div');
             leg.className = 'marker leg-support'; leg.style.left = (nx * GRID + 2500) + 'px'; leg.style.top = (ny * GRID + 2500) + 'px'; sLayer.appendChild(leg);
-            let e1 = edges[`${nx},${ny},H`], e2 = edges[`${nx-0.5},${ny},H`];
-            let e3 = edges[`${nx},${ny},V`], e4 = edges[`${nx},${ny-0.5},V`];
-            let isPerim = ((e1||0)===1 || (e2||0)===1 || (e3||0)===1 || (e4||0)===1);
-            if (sharedCount > 1) {
-                if (hNum >= 1.2) { drawSVG(sLayer, nx, ny, SVG_CLAMP_2, false, {x: 0, y: 0}); counts.clamp_2++; }
-                else if (hNum >= 0.4) {
-                    if (sharedCount === 3) { drawSVG(sLayer, nx, ny, SVG_CLAMP_2, false, {x: 0, y: 0}); counts.clamp_2++; }
-                    else if (sharedCount === 2 && isPerim) { drawSVG(sLayer, nx, ny, SVG_CLAMP_1, false, {x: 12, y: 0}); counts.clamp_1++; }
-                }
+            const clampKind = getSupportClampKind(sharedCount, hNum);
+            if (clampKind === 2) {
+                drawSVG(sLayer, nx, ny, SVG_CLAMP_2, false, {x: 0, y: 0});
+                counts.clamp_2++;
+            } else if (clampKind === 1) {
+                drawSVG(sLayer, nx, ny, SVG_CLAMP_1, false, {x: 12, y: 0});
+                counts.clamp_1++;
             }
         }
 
@@ -4376,15 +4404,11 @@
 
         Object.values(nodes).forEach(n => {
             const nx = n.x, nz = n.z;
-            const e1 = edgeMap3D[`${nx},${nz},H`], e2 = edgeMap3D[`${nx-0.5},${nz},H`];
-            const e3 = edgeMap3D[`${nx},${nz},V`], e4 = edgeMap3D[`${nx},${nz-0.5},V`];
-            const isPerim = ((e1||0)===1 || (e2||0)===1 || (e3||0)===1 || (e4||0)===1);
-            if(n.count > 1) {
-                if(hNum >= 1.2 || (hNum >= 0.4 && n.count === 3)) {
-                    pushMarker(primitives, p(nx, Math.min(hNum-0.10, 0.55), nz), 'clamp2', 'СОп60×2', 8);
-                } else if(hNum >= 0.4 && n.count === 2 && isPerim) {
-                    pushMarker(primitives, p(nx, Math.min(hNum-0.10, 0.55), nz), 'clamp1', 'СОп60', 7);
-                }
+            const clampKind = getSupportClampKind(n.count, hNum);
+            if(clampKind === 2) {
+                pushMarker(primitives, p(nx, Math.min(hNum-0.10, 0.55), nz), 'clamp2', 'СОп60×2', 8);
+            } else if(clampKind === 1) {
+                pushMarker(primitives, p(nx, Math.min(hNum-0.10, 0.55), nz), 'clamp1', 'СОп60', 7);
             }
         });
 
