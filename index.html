@@ -2299,6 +2299,27 @@
         return 0;
     }
 
+
+    function isPlatformPeripheral(pl, edgesMap) {
+        // Платформа периферическая, если у неё есть хотя бы одно наружное ребро.
+        for(let dx = 0; dx < pl.w; dx += 0.5) {
+            if((edgesMap[`${pl.x + dx},${pl.y},H`] || 0) === 1) return true;
+            if((edgesMap[`${pl.x + dx},${pl.y + pl.h},H`] || 0) === 1) return true;
+        }
+        for(let dy = 0; dy < pl.h; dy += 0.5) {
+            if((edgesMap[`${pl.x},${pl.y + dy},V`] || 0) === 1) return true;
+            if((edgesMap[`${pl.x + pl.w},${pl.y + dy},V`] || 0) === 1) return true;
+        }
+        return false;
+    }
+
+    function getPlatformConnectorCount(p1, p2, joint, edgesMap, isDoubtMode=false) {
+        // Правило: если стык относится к периферической платформе — ставим 2 соединителя.
+        // Иначе оставляем прежнюю логику: длинный стык > 1 м или режим "есть сомнения" -> 2, короткий -> 1.
+        if(isPlatformPeripheral(p1, edgesMap) || isPlatformPeripheral(p2, edgesMap)) return 2;
+        return (joint.l > 1.0 || isDoubtMode) ? 2 : 1;
+    }
+
     const STAIR_PRESETS = [
         { article:'ЛПС1000-0,4|0,6', steps:3, min:0.4, max:0.6, weight:36.6, depth:1.100 },
         { article:'ЛПС1000-0,5|0,8', steps:4, min:0.5, max:0.8, weight:45.9, depth:1.414 },
@@ -3708,7 +3729,7 @@
                     drawSVG(sLayer, isV ? joint.fixed : ins1, isV ? ins1 : joint.fixed, SVG_INS, isV);
                     drawSVG(sLayer, isV ? joint.fixed : ins2, isV ? ins2 : joint.fixed, SVG_INS, isV);
                     counts.insert += 2;
-                    let spCount = (joint.l > 1.0 || isDoubtMode) ? 2 : 1;
+                    let spCount = getPlatformConnectorCount(p1, p2, joint, edges, isDoubtMode);
                     if (spCount === 1) {
                         let mid = joint.s + joint.l * 0.5;
                         drawSVG(sLayer, isV ? joint.fixed : mid, isV ? mid : joint.fixed, SVG_CONN, isV);
@@ -4433,7 +4454,7 @@
                         pushMarker(primitives, p(joint.fixed, hNum + 0.025, ins1), 'insert', 'ГВПв', 6);
                         pushMarker(primitives, p(joint.fixed, hNum + 0.025, ins2), 'insert', 'ГВПв', 6);
                     }
-                    const spCount = (joint.l > 1.0 || (document.getElementById('doubt-toggle') && document.getElementById('doubt-toggle').checked)) ? 2 : 1;
+                    const spCount = getPlatformConnectorCount(p1, p2, joint, edgeMap3D, !!(document.getElementById('doubt-toggle') && document.getElementById('doubt-toggle').checked));
                     const connPositions = spCount === 1 ? [joint.s + joint.l * 0.5] : [joint.s + joint.l * 0.35, joint.s + joint.l * 0.65];
                     connPositions.forEach(pos => {
                         if(joint.type === 'H') pushMarker(primitives, p(pos, hNum + 0.035, joint.fixed), 'connector', 'СП-01-АБ', 7);
