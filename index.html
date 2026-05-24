@@ -1464,6 +1464,30 @@
             #support-select { max-width: 132px; }
         }
 
+
+        /* SPEC SCROLL FIX */
+        .sidebar {
+            min-height: 0 !important;
+            overflow-y: auto !important;
+            overflow-x: hidden !important;
+            scrollbar-gutter: stable;
+        }
+        .calc-table {
+            flex: 0 0 auto;
+        }
+        .legend-box {
+            margin-top: 14px !important;
+            flex: 0 0 auto;
+        }
+        @media screen {
+            .main-content {
+                min-height: 0;
+            }
+            .sidebar {
+                max-height: calc(100vh - 102px);
+            }
+        }
+
         /* PRINT MEDIA */
         #print-area { display: none; }
 
@@ -1841,10 +1865,6 @@
             <div class="legend-item">
                 <div class="legend-icon-wrap"><div style="width:32px;height:5px;background:#0f172a;border:1px solid #38bdf8"></div></div>
                 <span>Перила / ограждение</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-icon-wrap" id="leg-rail-bracket"></div>
-                <span>Кронштейн / струбцина крепления перил</span>
             </div>
             <div class="legend-item">
                 <div class="legend-icon-wrap" id="leg-rail-joiner"></div>
@@ -3348,9 +3368,6 @@
         const aluminumUniversalKeys = new Set();
 
         railings.forEach((r, idx) => {
-            const br = r.bracket || 'Кр.ППл';
-            brackets[br] = (brackets[br] || 0) + 2;
-
             ['start','end'].forEach(endName => {
                 const pt = railEndpoint(r, endName);
                 const key = railPointKey(pt);
@@ -3389,23 +3406,6 @@
 
     function drawRailHardwareMarkers(layer) {
         const hw = getRailHardwareSummary();
-        const drawnBrackets = new Set();
-
-        railings.forEach((r, idx) => {
-            ['start','end'].forEach(endName => {
-                const pt = railEndpoint(r, endName);
-                const k = `${idx}|${endName}`;
-                if(drawnBrackets.has(k)) return;
-                drawnBrackets.add(k);
-                const el = document.createElement('div');
-                el.className = 'rail-hardware-marker bracket';
-                el.title = `${r.bracket || 'Кр.ППл'} — кронштейн/струбцина перил`;
-                el.style.left = (pt.x * GRID + 2500) + 'px';
-                el.style.top = (pt.y * GRID + 2500) + 'px';
-                el.innerHTML = SVG_RAIL_BRACKET;
-                layer.appendChild(el);
-            });
-        });
 
         Object.entries(hw.points).forEach(([key, items]) => {
             if(items.length < 2) return;
@@ -3769,7 +3769,7 @@
             counts.stairRailKits += 1;
             counts.stairAnchorKits += 2;
         });
-        counts.railClamp = Object.values(counts.railBrackets || {}).reduce((a,b)=>a+b,0);
+        counts.railClamp = 0;
 
         const reinf = getReinforcementRuns();
         reinf.diagonals.forEach(r=>drawDiagonal(aLayer,r));
@@ -3843,9 +3843,6 @@
             addSpecRow(body, pBody, lineObj, `Перила платформ ${name}`, obj.count, 'шт.', obj.weight, totalWeightObj);
         });
         if(counts.railCustom > 0) addSpecRow(body, pBody, lineObj, 'Перила нестандартные / участок 0.5 м — ручная проверка', counts.railCustom, 'шт.', 0, totalWeightObj);
-        Object.entries(counts.railBrackets || {}).forEach(([name, count]) => {
-            addSpecRow(body, pBody, lineObj, `Кронштейн / струбцина крепления перил ${name}`, count, 'шт.', 0, totalWeightObj);
-        });
         if((counts.railAlJoiners || 0) > 0) {
             addSpecRow(body, pBody, lineObj, 'Соединитель секций алюминиевых перил, универсальный', counts.railAlJoiners, 'шт.', 0, totalWeightObj);
         }
@@ -4463,19 +4460,6 @@
                 }
             }
         }
-
-        railings.forEach(r => {
-            const y = hNum + 0.28;
-            if(r.orient === 'H') {
-                const z = r.fixed + (r.side === 'top' ? -0.03 : 0.03);
-                pushMarker(primitives, p(r.start, y, z), 'railClamp', r.bracket || 'Кр.ППл', 6);
-                pushMarker(primitives, p(r.end, y, z), 'railClamp', r.bracket || 'Кр.ППл', 6);
-            } else {
-                const x = r.fixed + (r.side === 'left' ? -0.03 : 0.03);
-                pushMarker(primitives, p(x, y, r.start), 'railClamp', r.bracket || 'Кр.ППл', 6);
-                pushMarker(primitives, p(x, y, r.end), 'railClamp', r.bracket || 'Кр.ППл', 6);
-            }
-        });
 
         // 3D-маркеры соединителей между секциями перил.
         const railHw3D = getRailHardwareSummary();
