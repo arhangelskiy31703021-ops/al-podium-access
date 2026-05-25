@@ -1488,6 +1488,18 @@
             }
         }
 
+
+        #support-select {
+            max-width: 270px !important;
+            min-width: 220px;
+        }
+        @media (max-width: 1360px) {
+            #support-select {
+                max-width: 220px !important;
+                min-width: 180px;
+            }
+        }
+
         /* PRINT MEDIA */
         #print-area { display: none; }
 
@@ -1693,10 +1705,22 @@
         
         
         <label style="margin-left: 10px;">Опора:</label>
-        <select id="support-select" onchange="updateAll()" title="Авто: при высоте ровно 1.0 м — стационарная, иначе телескопическая">
-            <option value="auto">Авто по высоте</option>
-            <option value="telescopic">Телескопическая</option>
-            <option value="fixed">Стационарная 1.0 м</option>
+        <select id="support-select" onchange="handleSupportInput()" title="Опора задаётся вручную для новых платформ или выбранной платформы">
+            <optgroup label="Стационарные Оп60">
+                <option value="fixed_0_2">Оп60-0,2 — 0.2 м · 0.2 кг</option>
+                <option value="fixed_0_4">Оп60-0,4 — 0.4 м · 0.5 кг</option>
+                <option value="fixed_0_6">Оп60-0,6 — 0.6 м · 0.8 кг</option>
+                <option value="fixed_0_8">Оп60-0,8 — 0.8 м · 1.1 кг</option>
+                <option value="fixed_1_0" selected>Оп60-1,0 — 1.0 м · 1.4 кг</option>
+            </optgroup>
+            <optgroup label="Телескопические ОпТ60">
+                <option value="tel_0_4">ОпТ60-0,4 — 0.4–0.6 м · 1.1 кг</option>
+                <option value="tel_0_6">ОпТ60-0,6 — 0.6–1.0 м · 1.7 кг</option>
+                <option value="tel_0_7">ОпТ60-0,7 — 0.7–1.2 м · 2.0 кг</option>
+                <option value="tel_0_8">ОпТ60-0,8 — 0.8–1.4 м · 2.2 кг</option>
+                <option value="tel_1_0">ОпТ60-1,0 — 1.0–1.8 м · 2.8 кг</option>
+                <option value="tel_1_2">ОпТ60-1,2 — 1.2–2.2 м · 3.3 кг</option>
+            </optgroup>
         </select>
 <label class="doubt-toggle" style="margin-left: 15px;" title="Форсированное усиление: 2 соединителя на любой стык">
             <input type="checkbox" id="doubt-toggle" onchange="updateAll()">
@@ -2301,6 +2325,16 @@
     }
 
 
+    function handleSupportInput() {
+        const supportId = getCurrentSupportId();
+        if(selectedIdx >= 0 && platforms[selectedIdx]) {
+            pushUndo();
+            platforms[selectedIdx].supportId = supportId;
+        }
+        updateAll();
+    }
+
+
     // Весовые коэффициенты: платформы/базовая фурнитура из старого ТЗ.
     // Для новых элементов вес оставлен 0, чтобы не врать: заполните по актуальному каталогу/прайсу.
     const WEIGHTS = {
@@ -2309,31 +2343,36 @@
         COMP: { connector: 0.40, insert: 0.15, clamp: 0.65, leg: 2.80, fixedLeg: 2.80, rail1: 0, rail2: 0, railClamp: 0, stair: 0, diagonal: 0, frame: 0 }
     };
 
-    const SUPPORT_TYPES = {
-        telescopic: {
-            article: 'Опора телескопическая 60×60',
-            shortName: 'Опора телескоп.',
-            reportName: 'Опора телескопическая квадратная 60×60',
-            weightKey: 'leg'
-        },
-        fixed: {
-            article: 'Опора стационарная 1.0 м',
-            shortName: 'Опора стац. 1.0м',
-            reportName: 'Опора стационарная 1.0 м',
-            weightKey: 'fixedLeg'
-        }
+    const SUPPORT_PRESETS = {
+        fixed_0_2: { mode:'fixed', article:'Оп60-0,2', shortName:'Опора стац. 0.2м', reportName:'Опора стационарная Оп60-0,2', nominalHeight:0.2, range:null, weight:0.2 },
+        fixed_0_4: { mode:'fixed', article:'Оп60-0,4', shortName:'Опора стац. 0.4м', reportName:'Опора стационарная Оп60-0,4', nominalHeight:0.4, range:null, weight:0.5 },
+        fixed_0_6: { mode:'fixed', article:'Оп60-0,6', shortName:'Опора стац. 0.6м', reportName:'Опора стационарная Оп60-0,6', nominalHeight:0.6, range:null, weight:0.8 },
+        fixed_0_8: { mode:'fixed', article:'Оп60-0,8', shortName:'Опора стац. 0.8м', reportName:'Опора стационарная Оп60-0,8', nominalHeight:0.8, range:null, weight:1.1 },
+        fixed_1_0: { mode:'fixed', article:'Оп60-1,0', shortName:'Опора стац. 1.0м', reportName:'Опора стационарная Оп60-1,0', nominalHeight:1.0, range:null, weight:1.4 },
+
+        tel_0_4: { mode:'telescopic', article:'ОпТ60-0,4', shortName:'Опора телескоп. 0.4–0.6м', reportName:'Опора телескопическая ОпТ60-0,4', nominalHeight:0.4, range:[0.4,0.6], weight:1.1 },
+        tel_0_6: { mode:'telescopic', article:'ОпТ60-0,6', shortName:'Опора телескоп. 0.6–1.0м', reportName:'Опора телескопическая ОпТ60-0,6', nominalHeight:0.6, range:[0.6,1.0], weight:1.7 },
+        tel_0_7: { mode:'telescopic', article:'ОпТ60-0,7', shortName:'Опора телескоп. 0.7–1.2м', reportName:'Опора телескопическая ОпТ60-0,7', nominalHeight:0.7, range:[0.7,1.2], weight:2.0 },
+        tel_0_8: { mode:'telescopic', article:'ОпТ60-0,8', shortName:'Опора телескоп. 0.8–1.4м', reportName:'Опора телескопическая ОпТ60-0,8', nominalHeight:0.8, range:[0.8,1.4], weight:2.2 },
+        tel_1_0: { mode:'telescopic', article:'ОпТ60-1,0', shortName:'Опора телескоп. 1.0–1.8м', reportName:'Опора телескопическая ОпТ60-1,0', nominalHeight:1.0, range:[1.0,1.8], weight:2.8 },
+        tel_1_2: { mode:'telescopic', article:'ОпТ60-1,2', shortName:'Опора телескоп. 1.2–2.2м', reportName:'Опора телескопическая ОпТ60-1,2', nominalHeight:1.2, range:[1.2,2.2], weight:3.3 }
     };
 
-    function getSelectedSupportType(heightOverride=null) {
-        const hNum = normalizeHeightValue(heightOverride ?? document.getElementById('h-input')?.value ?? 0.8);
-        const mode = document.getElementById('support-select')?.value || 'auto';
-        if(mode === 'fixed') return {...SUPPORT_TYPES.fixed, mode:'fixed', auto:false, height:hNum};
-        if(mode === 'telescopic') return {...SUPPORT_TYPES.telescopic, mode:'telescopic', auto:false, height:hNum};
+    function getCurrentSupportId() {
+        return document.getElementById('support-select')?.value || 'fixed_1_0';
+    }
 
-        const isExactlyOneMeter = Math.abs(hNum - 1.0) < 0.001;
-        return isExactlyOneMeter
-            ? {...SUPPORT_TYPES.fixed, mode:'fixed', auto:true, height:hNum}
-            : {...SUPPORT_TYPES.telescopic, mode:'telescopic', auto:true, height:hNum};
+    function getSupportPreset(id=null) {
+        return SUPPORT_PRESETS[id || getCurrentSupportId()] || SUPPORT_PRESETS.fixed_1_0;
+    }
+
+    function getPlatformSupportId(pl) {
+        return pl?.supportId || getCurrentSupportId();
+    }
+
+    function getSelectedSupportType(heightOverride=null, supportId=null) {
+        const preset = getSupportPreset(supportId);
+        return {...preset, auto:false, height: normalizeHeightValue(heightOverride ?? preset.nominalHeight)};
     }
 
 
@@ -2669,7 +2708,7 @@
     }
 
     function applyProjectState(state) {
-        platforms = (state.platforms || []).map(p => ({...p, height: normalizeHeightValue(p.height ?? state.height ?? 0.8)}));
+        platforms = (state.platforms || []).map(p => ({...p, height: normalizeHeightValue(p.height ?? state.height ?? 0.8), supportId: p.supportId || state.support || 'fixed_1_0'}));
         railings = state.railings || [];
         stairs = state.stairs || [];
         manualNoRailEdges = state.manualNoRailEdges || [];
@@ -2902,7 +2941,9 @@
         if(e.target.classList.contains('platform-rect')) {
             selectedIdx = parseInt(e.target.dataset.idx);
             const hInput = document.getElementById('h-input');
+            const supportSelect = document.getElementById('support-select');
             if(hInput && platforms[selectedIdx]) hInput.value = getPlatformHeight(platforms[selectedIdx]);
+            if(supportSelect && platforms[selectedIdx]) supportSelect.value = getPlatformSupportId(platforms[selectedIdx]);
             updateAll();
             e.stopPropagation();
             return;
@@ -2944,7 +2985,7 @@
         const coords = getCoords(e);
         if(!isOverlapping(coords)) {
             pushUndo();
-            platforms.push({...coords, w: currentTool.w, h: currentTool.h, id: currentTool.id, height: getCurrentHeightValue()});
+            platforms.push({...coords, w: currentTool.w, h: currentTool.h, id: currentTool.id, height: getCurrentHeightValue(), supportId: getCurrentSupportId()});
             updateAll();
         } else updateAll();
     });
@@ -3673,16 +3714,17 @@
             el.style.height = (p.h * GRID) + 'px';
             const ph = getPlatformHeight(p);
             p.height = ph;
+            p.supportId = p.supportId || getCurrentSupportId();
+            const support = getSupportPreset(p.supportId);
             const fontSize = Math.min(p.w, p.h) < 1 ? '9px' : '13px';
-            el.innerHTML = `<span style="font-size: ${fontSize}; line-height:1.15">${p.w}x${p.h}<br><small>h=${ph}м</small></span>`;
-            el.title = `Платформа ${p.w}×${p.h}, высота ${ph} м`;
+            el.innerHTML = `<span style="font-size: ${fontSize}; line-height:1.15">${p.w}x${p.h}<br><small>h=${ph}м</small><br><small>${support.article}</small></span>`;
+            el.title = `Платформа ${p.w}×${p.h}, высота ${ph} м, опора ${support.article}`;
             pLayer.appendChild(el);
             counts.platforms[p.id] = (counts.platforms[p.id] || 0) + 1;
             const platformKey = `${p.id}|${ph}`;
             counts.platformHeights[platformKey] = (counts.platformHeights[platformKey] || 0) + 1;
-            const support = getSelectedSupportType(ph);
-            const supportKey = `${support.mode}|${ph}|${support.auto ? 'auto' : 'manual'}`;
-            if(!counts.supportRows[supportKey]) counts.supportRows[supportKey] = {count:0, support, height:ph};
+            const supportKey = `${p.supportId}`;
+            if(!counts.supportRows[supportKey]) counts.supportRows[supportKey] = {count:0, support, supportId:p.supportId};
             counts.supportRows[supportKey].count += 4;
             minX = Math.min(minX, p.x); minY = Math.min(minY, p.y);
             maxX = Math.max(maxX, p.x + p.w); maxY = Math.max(maxY, p.y + p.h);
@@ -3733,9 +3775,10 @@
             const ph = getPlatformHeight(p);
             [[p.x,p.y], [p.x+p.w,p.y], [p.x,p.y+p.h], [p.x+p.w,p.y+p.h]].forEach(n => {
                 let key = n.join(',');
-                if (!nodes[key]) nodes[key] = { x: n[0], y: n[1], count: 0, heights: [] };
+                if (!nodes[key]) nodes[key] = { x: n[0], y: n[1], count: 0, heights: [], supportIds: [] };
                 nodes[key].count++;
                 nodes[key].heights.push(ph);
+                nodes[key].supportIds.push(p.supportId || getCurrentSupportId());
                 nodes[key].maxHeight = Math.max(nodes[key].maxHeight || 0, ph);
             });
         });
@@ -3858,19 +3901,17 @@
 
         const supportRows = counts.supportRows || {};
         Object.values(supportRows).forEach(row => {
-            const support = row.support || getSelectedSupportType(row.height || hNum);
-            const supportWeight = WEIGHTS.COMP[support.weightKey] ?? WEIGHTS.COMP.leg;
+            const support = row.support || getSupportPreset(row.supportId);
+            const supportWeight = support.weight || 0;
             let legW = row.count * supportWeight;
             totalWeightObj.value += legW;
 
-            const autoText = support.auto ? ' · авто' : ' · вручную';
-            const heightText = support.mode === 'fixed' ? '1.0 м' : `h=${normalizeHeightValue(row.height || hNum)}м`;
-            const warningText = (support.mode === 'fixed' && Math.abs(normalizeHeightValue(row.height || hNum) - 1.0) > 0.001)
-                ? ' ⚠ высота платформы не 1.0 м'
-                : '';
+            const heightText = support.range
+                ? `${support.range[0]}–${support.range[1]} м`
+                : `${support.nominalHeight} м`;
 
-            body.innerHTML += `<tr><td>${support.shortName} ${heightText}${autoText}${warningText}</td><td class="num-col" style="color:var(--valid)">${row.count}</td><td class="num-col">${legW.toFixed(1)}</td></tr>`;
-            pBody.innerHTML += `<tr><td style="text-align:center">${lineObj.value++}</td><td>${support.reportName}, ${heightText}${autoText}${warningText}</td><td style="text-align:center">${row.count}</td><td style="text-align:center">шт.</td><td style="text-align:center">${legW.toFixed(1)}</td></tr>`;
+            body.innerHTML += `<tr><td>${support.reportName} (${heightText})</td><td class="num-col" style="color:var(--valid)">${row.count}</td><td class="num-col">${legW.toFixed(1)}</td></tr>`;
+            pBody.innerHTML += `<tr><td style="text-align:center">${lineObj.value++}</td><td>${support.reportName}, ${heightText}</td><td style="text-align:center">${row.count}</td><td style="text-align:center">шт.</td><td style="text-align:center">${legW.toFixed(1)}</td></tr>`;
         });
 
         let totalClamps = counts.clamp_1 + (counts.clamp_2 * 2);
@@ -4421,9 +4462,10 @@
             const ph = getPlatformHeight(pl);
             [[pl.x,pl.y],[pl.x+pl.w,pl.y],[pl.x,pl.y+pl.h],[pl.x+pl.w,pl.y+pl.h]].forEach(n => {
                 const key = n.join(',');
-                if(!nodes[key]) nodes[key] = { x:n[0], z:n[1], count:0, heights:[] };
+                if(!nodes[key]) nodes[key] = { x:n[0], z:n[1], count:0, heights:[], supportIds:[] };
                 nodes[key].count++;
                 nodes[key].heights.push(ph);
+                nodes[key].supportIds.push(pl.supportId || getCurrentSupportId());
                 nodes[key].maxHeight = Math.max(nodes[key].maxHeight || 0, ph);
             });
         });
@@ -4432,7 +4474,7 @@
         Object.values(nodes).forEach(n => {
             const lx = n.x, lz = n.z;
             const nodeHeight = n.maxHeight || hNum;
-            const support = getSelectedSupportType(nodeHeight);
+            const support = getSupportPreset((n.supportIds && n.supportIds[0]) || getCurrentSupportId());
             const supportStroke = support.mode === 'fixed' ? '#111111' : '#475569';
             const supportFill = support.mode === 'fixed' ? '#ffffff' : '#f8fafc';
             pushBox(primitives, lx-0.03, 0.03, lz-0.03, lx+0.03, nodeHeight - deckThickness, lz+0.03, {top:supportFill, side1:'#edf2f7', side2:'#edf2f7', stroke:supportStroke}); addBoxPoints(lx-0.03, 0.03, lz-0.03, lx+0.03, nodeHeight - deckThickness, lz+0.03);
