@@ -1688,8 +1688,8 @@
             <option value="PP110">ПЛ110 (18мм - 750кг/м²)</option>
         </select>
         
-        <label style="margin-left: 10px;">Высота (м):</label>
-        <input type="number" id="h-input" value="0.8" step="0.2" min="0.2" max="2.0" oninput="updateAll()">
+        <label style="margin-left: 10px;" title="Высота для новых платформ. Если выбрана платформа — меняется только она.">Высота (м):</label>
+        <input type="number" id="h-input" value="0.8" step="0.2" min="0.2" max="2.0" oninput="handleHeightInput()">
         
         
         <label style="margin-left: 10px;">Опора:</label>
@@ -2272,6 +2272,35 @@
     let isDrawingMode = false;
     let accessoryMode = 'none'; // none | rail | stair | diagonal | frame | delete
 
+    function getCurrentHeightValue() {
+        const raw = parseFloat(document.getElementById('h-input')?.value);
+        return Number.isFinite(raw) ? Math.max(0.2, Math.min(2.0, raw)) : 0.8;
+    }
+
+    function normalizeHeightValue(value) {
+        const n = parseFloat(value);
+        return Number.isFinite(n) ? Math.round(Math.max(0.2, Math.min(2.0, n)) * 100) / 100 : 0.8;
+    }
+
+    function getPlatformHeight(pl) {
+        return normalizeHeightValue(pl?.height ?? document.getElementById('h-input')?.value ?? 0.8);
+    }
+
+    function getProjectMaxHeight() {
+        if(!platforms.length) return getCurrentHeightValue();
+        return Math.max(...platforms.map(getPlatformHeight));
+    }
+
+    function handleHeightInput() {
+        const h = getCurrentHeightValue();
+        if(selectedIdx >= 0 && platforms[selectedIdx]) {
+            pushUndo();
+            platforms[selectedIdx].height = h;
+        }
+        updateAll();
+    }
+
+
     // Весовые коэффициенты: платформы/базовая фурнитура из старого ТЗ.
     // Для новых элементов вес оставлен 0, чтобы не врать: заполните по актуальному каталогу/прайсу.
     const WEIGHTS = {
@@ -2295,16 +2324,16 @@
         }
     };
 
-    function getSelectedSupportType() {
-        const hNum = parseFloat(document.getElementById('h-input')?.value) || 0;
+    function getSelectedSupportType(heightOverride=null) {
+        const hNum = normalizeHeightValue(heightOverride ?? document.getElementById('h-input')?.value ?? 0.8);
         const mode = document.getElementById('support-select')?.value || 'auto';
-        if(mode === 'fixed') return {...SUPPORT_TYPES.fixed, mode:'fixed', auto:false};
-        if(mode === 'telescopic') return {...SUPPORT_TYPES.telescopic, mode:'telescopic', auto:false};
+        if(mode === 'fixed') return {...SUPPORT_TYPES.fixed, mode:'fixed', auto:false, height:hNum};
+        if(mode === 'telescopic') return {...SUPPORT_TYPES.telescopic, mode:'telescopic', auto:false, height:hNum};
 
         const isExactlyOneMeter = Math.abs(hNum - 1.0) < 0.001;
         return isExactlyOneMeter
-            ? {...SUPPORT_TYPES.fixed, mode:'fixed', auto:true}
-            : {...SUPPORT_TYPES.telescopic, mode:'telescopic', auto:true};
+            ? {...SUPPORT_TYPES.fixed, mode:'fixed', auto:true, height:hNum}
+            : {...SUPPORT_TYPES.telescopic, mode:'telescopic', auto:true, height:hNum};
     }
 
 
@@ -2640,7 +2669,7 @@
     }
 
     function applyProjectState(state) {
-        platforms = state.platforms || [];
+        platforms = (state.platforms || []).map(p => ({...p, height: normalizeHeightValue(p.height ?? state.height ?? 0.8)}));
         railings = state.railings || [];
         stairs = state.stairs || [];
         manualNoRailEdges = state.manualNoRailEdges || [];
@@ -2872,6 +2901,8 @@
     canvasArea.addEventListener('mousedown', (e) => {
         if(e.target.classList.contains('platform-rect')) {
             selectedIdx = parseInt(e.target.dataset.idx);
+            const hInput = document.getElementById('h-input');
+            if(hInput && platforms[selectedIdx]) hInput.value = getPlatformHeight(platforms[selectedIdx]);
             updateAll();
             e.stopPropagation();
             return;
@@ -2913,7 +2944,7 @@
         const coords = getCoords(e);
         if(!isOverlapping(coords)) {
             pushUndo();
-            platforms.push({...coords, w: currentTool.w, h: currentTool.h, id: currentTool.id});
+            platforms.push({...coords, w: currentTool.w, h: currentTool.h, id: currentTool.id, height: getCurrentHeightValue()});
             updateAll();
         } else updateAll();
     });
@@ -3554,7 +3585,7 @@
     }
 
     function getAutoReinforcementPieces() {
-        const hNum = parseFloat(document.getElementById('h-input').value) || 0;
+        const hNum = getCurrentHeightValue();
         if(hNum < 1.3) return [];
 
         const blocks = getAutoReinforcementBlocks2x2();
@@ -3625,7 +3656,7 @@
         const aLayer = document.getElementById('accessories-layer');
         pLayer.innerHTML = ''; sLayer.innerHTML = ''; perimLayer.innerHTML = ''; aLayer.innerHTML = '';
 
-        let counts = { platforms: {}, connector: 0, insert: 0, clamp_1: 0, clamp_2: 0, legs: 0, joints: 0, rail1:0, rail2:0, railCustom:0, railClamp:0, railWeight:0, railBrackets:{}, railJoiners:0, railStraightJoiners:0, railCornerJoiners:0, railAlJoiners:0, railSteelStraightJoiners:0, railSteelCornerJoiners:0, stairs:0, stairByArticle:{}, stairWeight:0, stairRailKits:0, stairAnchorKits:0, diagonals:0, frames:0 };
+        let counts = { platforms: {}, platformHeights: {}, supportRows: {}, connector: 0, insert: 0, clamp_1: 0, clamp_2: 0, legs: 0, joints: 0, rail1:0, rail2:0, railCustom:0, railClamp:0, railWeight:0, railBrackets:{}, railJoiners:0, railStraightJoiners:0, railCornerJoiners:0, railAlJoiners:0, railSteelStraightJoiners:0, railSteelCornerJoiners:0, stairs:0, stairByArticle:{}, stairWeight:0, stairRailKits:0, stairAnchorKits:0, diagonals:0, frames:0 };
         const hNum = parseFloat(document.getElementById('h-input').value) || 0;
         const isDoubtMode = document.getElementById('doubt-toggle').checked;
         const showPerim = document.getElementById('perim-toggle').checked;
@@ -3640,10 +3671,19 @@
             el.style.top = (p.y * GRID + 2500) + 'px';
             el.style.width = (p.w * GRID) + 'px';
             el.style.height = (p.h * GRID) + 'px';
-            const fontSize = Math.min(p.w, p.h) < 1 ? '10px' : '14px';
-            el.innerHTML = `<span style="font-size: ${fontSize}">${p.w}x${p.h}</span>`;
+            const ph = getPlatformHeight(p);
+            p.height = ph;
+            const fontSize = Math.min(p.w, p.h) < 1 ? '9px' : '13px';
+            el.innerHTML = `<span style="font-size: ${fontSize}; line-height:1.15">${p.w}x${p.h}<br><small>h=${ph}м</small></span>`;
+            el.title = `Платформа ${p.w}×${p.h}, высота ${ph} м`;
             pLayer.appendChild(el);
             counts.platforms[p.id] = (counts.platforms[p.id] || 0) + 1;
+            const platformKey = `${p.id}|${ph}`;
+            counts.platformHeights[platformKey] = (counts.platformHeights[platformKey] || 0) + 1;
+            const support = getSelectedSupportType(ph);
+            const supportKey = `${support.mode}|${ph}|${support.auto ? 'auto' : 'manual'}`;
+            if(!counts.supportRows[supportKey]) counts.supportRows[supportKey] = {count:0, support, height:ph};
+            counts.supportRows[supportKey].count += 4;
             minX = Math.min(minX, p.x); minY = Math.min(minY, p.y);
             maxX = Math.max(maxX, p.x + p.w); maxY = Math.max(maxY, p.y + p.h);
             for(let dx=0; dx<p.w; dx+=0.5) {
@@ -3690,10 +3730,13 @@
 
         let nodes = {};
         platforms.forEach(p => {
+            const ph = getPlatformHeight(p);
             [[p.x,p.y], [p.x+p.w,p.y], [p.x,p.y+p.h], [p.x+p.w,p.y+p.h]].forEach(n => {
                 let key = n.join(',');
-                if (!nodes[key]) nodes[key] = { x: n[0], y: n[1], count: 0 };
+                if (!nodes[key]) nodes[key] = { x: n[0], y: n[1], count: 0, heights: [] };
                 nodes[key].count++;
+                nodes[key].heights.push(ph);
+                nodes[key].maxHeight = Math.max(nodes[key].maxHeight || 0, ph);
             });
         });
         counts.legs = platforms.length * 4;
@@ -3702,7 +3745,7 @@
             let sharedCount = nodes[key].count;
             const leg = document.createElement('div');
             leg.className = 'marker leg-support'; leg.style.left = (nx * GRID + 2500) + 'px'; leg.style.top = (ny * GRID + 2500) + 'px'; sLayer.appendChild(leg);
-            const clampKind = getSupportClampKind(sharedCount, hNum);
+            const clampKind = getSupportClampKind(sharedCount, nodes[key].maxHeight || hNum);
             if (clampKind === 2) {
                 drawSVG(sLayer, nx, ny, SVG_CLAMP_2, false, {x: 0, y: 0});
                 counts.clamp_2++;
@@ -3798,31 +3841,37 @@
         body.innerHTML = ''; pBody.innerHTML = '';
         let totalWeightObj = {value:0}; let lineObj = {value:1}; let totalPlatforms = 0;
 
-        for(let id in counts.platforms) {
-            let n = counts.platforms[id]; totalPlatforms += n;
-            let w = WEIGHTS[model][id] * n; totalWeightObj.value += w;
-            const uiName = `Платформа ${id} (${model === 'PP90' ? 'Пл90' : 'Пл110'})`;
-            body.innerHTML += `<tr><td>${uiName}</td><td class="num-col">${n}</td><td class="num-col">${w.toFixed(1)}</td></tr>`;
-            pBody.innerHTML += `<tr><td style="text-align:center">${lineObj.value++}</td><td>Платформа сценическая ${id} (${model === 'PP90' ? 'Пл90' : 'Пл110'})</td><td style="text-align:center">${n}</td><td style="text-align:center">шт.</td><td style="text-align:center">${w.toFixed(1)}</td></tr>`;
-        }
+        const platformGroups = counts.platformHeights && Object.keys(counts.platformHeights).length
+            ? counts.platformHeights
+            : Object.fromEntries(Object.entries(counts.platforms).map(([id,n]) => [`${id}|${hNum}`, n]));
 
-        if (counts.legs > 0) {
-            const support = getSelectedSupportType();
+        Object.entries(platformGroups).forEach(([key, n]) => {
+            const [id, heightStr] = key.split('|');
+            const ph = normalizeHeightValue(heightStr || hNum);
+            totalPlatforms += n;
+            let w = (WEIGHTS[model][id] || 0) * n;
+            totalWeightObj.value += w;
+            const uiName = `Платформа ${id}, h=${ph}м (${model === 'PP90' ? 'Пл90' : 'Пл110'})`;
+            body.innerHTML += `<tr><td>${uiName}</td><td class="num-col">${n}</td><td class="num-col">${w.toFixed(1)}</td></tr>`;
+            pBody.innerHTML += `<tr><td style="text-align:center">${lineObj.value++}</td><td>Платформа сценическая ${id}, h=${ph}м (${model === 'PP90' ? 'Пл90' : 'Пл110'})</td><td style="text-align:center">${n}</td><td style="text-align:center">шт.</td><td style="text-align:center">${w.toFixed(1)}</td></tr>`;
+        });
+
+        const supportRows = counts.supportRows || {};
+        Object.values(supportRows).forEach(row => {
+            const support = row.support || getSelectedSupportType(row.height || hNum);
             const supportWeight = WEIGHTS.COMP[support.weightKey] ?? WEIGHTS.COMP.leg;
-            let legW = counts.legs * supportWeight;
+            let legW = row.count * supportWeight;
             totalWeightObj.value += legW;
 
             const autoText = support.auto ? ' · авто' : ' · вручную';
-            const heightText = support.mode === 'fixed'
-                ? '1.0 м'
-                : `h=${hNum}м`;
-            const warningText = (support.mode === 'fixed' && Math.abs(hNum - 1.0) > 0.001)
-                ? ' ⚠ высота проекта не 1.0 м'
+            const heightText = support.mode === 'fixed' ? '1.0 м' : `h=${normalizeHeightValue(row.height || hNum)}м`;
+            const warningText = (support.mode === 'fixed' && Math.abs(normalizeHeightValue(row.height || hNum) - 1.0) > 0.001)
+                ? ' ⚠ высота платформы не 1.0 м'
                 : '';
 
-            body.innerHTML += `<tr><td>${support.shortName} ${heightText}${autoText}${warningText}</td><td class="num-col" style="color:var(--valid)">${counts.legs}</td><td class="num-col">${legW.toFixed(1)}</td></tr>`;
-            pBody.innerHTML += `<tr><td style="text-align:center">${lineObj.value++}</td><td>${support.reportName}, ${heightText}${autoText}${warningText}</td><td style="text-align:center">${counts.legs}</td><td style="text-align:center">шт.</td><td style="text-align:center">${legW.toFixed(1)}</td></tr>`;
-        }
+            body.innerHTML += `<tr><td>${support.shortName} ${heightText}${autoText}${warningText}</td><td class="num-col" style="color:var(--valid)">${row.count}</td><td class="num-col">${legW.toFixed(1)}</td></tr>`;
+            pBody.innerHTML += `<tr><td style="text-align:center">${lineObj.value++}</td><td>${support.reportName}, ${heightText}${autoText}${warningText}</td><td style="text-align:center">${row.count}</td><td style="text-align:center">шт.</td><td style="text-align:center">${legW.toFixed(1)}</td></tr>`;
+        });
 
         let totalClamps = counts.clamp_1 + (counts.clamp_2 * 2);
         const comps = [
@@ -4349,14 +4398,16 @@
         }
 
         if(platforms.length === 0) return { primitives, points };
-        const hNum = parseFloat(document.getElementById('h-input').value) || 0.8;
+        const hNum = getProjectMaxHeight();
         const deckThickness = 0.12;
 
         let minX=Infinity, maxX=-Infinity, minZ=Infinity, maxZ=-Infinity;
         platforms.forEach(pl => {
+            const ph = getPlatformHeight(pl);
             minX = Math.min(minX, pl.x); maxX = Math.max(maxX, pl.x + pl.w);
             minZ = Math.min(minZ, pl.y); maxZ = Math.max(maxZ, pl.y + pl.h);
-            pushBox(primitives, pl.x, hNum - deckThickness, pl.y, pl.x + pl.w, hNum, pl.y + pl.h); addBoxPoints(pl.x, hNum - deckThickness, pl.y, pl.x + pl.w, hNum, pl.y + pl.h);
+            pushBox(primitives, pl.x, ph - deckThickness, pl.y, pl.x + pl.w, ph, pl.y + pl.h);
+            addBoxPoints(pl.x, ph - deckThickness, pl.y, pl.x + pl.w, ph, pl.y + pl.h);
         });
 
         // ground grid
@@ -4366,23 +4417,29 @@
         for(let z = gz0; z <= gz1; z += 1) pushLine(primitives, p(gx0,0,z), p(gx1,0,z), '#d6dde4', 1);
 
         const nodes = {};
-        platforms.forEach(pl => [[pl.x,pl.y],[pl.x+pl.w,pl.y],[pl.x,pl.y+pl.h],[pl.x+pl.w,pl.y+pl.h]].forEach(n => {
-            const key = n.join(',');
-            if(!nodes[key]) nodes[key] = { x:n[0], z:n[1], count:0 };
-            nodes[key].count++;
-        }));
+        platforms.forEach(pl => {
+            const ph = getPlatformHeight(pl);
+            [[pl.x,pl.y],[pl.x+pl.w,pl.y],[pl.x,pl.y+pl.h],[pl.x+pl.w,pl.y+pl.h]].forEach(n => {
+                const key = n.join(',');
+                if(!nodes[key]) nodes[key] = { x:n[0], z:n[1], count:0, heights:[] };
+                nodes[key].count++;
+                nodes[key].heights.push(ph);
+                nodes[key].maxHeight = Math.max(nodes[key].maxHeight || 0, ph);
+            });
+        });
 
         // Полурендер опор: боксы + поверхностные линии, чтобы нижние стойки были видны с любого ракурса.
         Object.values(nodes).forEach(n => {
             const lx = n.x, lz = n.z;
-            const support = getSelectedSupportType();
+            const nodeHeight = n.maxHeight || hNum;
+            const support = getSelectedSupportType(nodeHeight);
             const supportStroke = support.mode === 'fixed' ? '#111111' : '#475569';
             const supportFill = support.mode === 'fixed' ? '#ffffff' : '#f8fafc';
-            pushBox(primitives, lx-0.03, 0.03, lz-0.03, lx+0.03, hNum - deckThickness, lz+0.03, {top:supportFill, side1:'#edf2f7', side2:'#edf2f7', stroke:supportStroke}); addBoxPoints(lx-0.03, 0.03, lz-0.03, lx+0.03, hNum - deckThickness, lz+0.03);
+            pushBox(primitives, lx-0.03, 0.03, lz-0.03, lx+0.03, nodeHeight - deckThickness, lz+0.03, {top:supportFill, side1:'#edf2f7', side2:'#edf2f7', stroke:supportStroke}); addBoxPoints(lx-0.03, 0.03, lz-0.03, lx+0.03, nodeHeight - deckThickness, lz+0.03);
             pushBox(primitives, lx-0.055, 0.0, lz-0.055, lx+0.055, 0.03, lz+0.055, {top:'#f8fafc', side1:'#edf2f7', side2:'#edf2f7', stroke:supportStroke}); addBoxPoints(lx-0.055, 0.0, lz-0.055, lx+0.055, 0.03, lz+0.055);
-            pushOverlayLine(primitives, p(lx,0.02,lz), p(lx,hNum - deckThickness,lz), supportStroke, support.mode === 'fixed' ? 3.8 : 3.2);
-            if(support.mode === 'telescopic' && hNum > 0.55) {
-                pushOverlayLine(primitives, p(lx,Math.max(0.18, hNum*0.45),lz), p(lx,Math.min(hNum - deckThickness, hNum*0.72),lz), '#94a3b8', 1.4);
+            pushOverlayLine(primitives, p(lx,0.02,lz), p(lx,nodeHeight - deckThickness,lz), supportStroke, support.mode === 'fixed' ? 3.8 : 3.2);
+            if(support.mode === 'telescopic' && nodeHeight > 0.55) {
+                pushOverlayLine(primitives, p(lx,Math.max(0.18, nodeHeight*0.45),lz), p(lx,Math.min(nodeHeight - deckThickness, nodeHeight*0.72),lz), '#94a3b8', 1.4);
             }
             pushMarker(primitives, p(lx,0.02,lz), 'foot', support.mode === 'fixed' ? 'СТ' : '', 5);
         });
@@ -4422,7 +4479,7 @@
 
         Object.values(nodes).forEach(n => {
             const nx = n.x, nz = n.z;
-            const clampKind = getSupportClampKind(n.count, hNum);
+            const clampKind = getSupportClampKind(n.count, n.maxHeight || hNum);
             if(clampKind === 2) {
                 pushMarker(primitives, p(nx, Math.min(hNum-0.10, 0.55), nz), 'clamp2', 'СОп60×2', 8);
             } else if(clampKind === 1) {
