@@ -1500,6 +1500,22 @@
             }
         }
 
+
+        #support-select option[disabled] {
+            display: none;
+        }
+        .platform-rect.selected {
+            outline: 3px solid #38bdf8 !important;
+            outline-offset: 3px;
+            box-shadow: 0 0 0 4px rgba(56,189,248,.24), 0 12px 34px rgba(56,189,248,.18) !important;
+            z-index: 25 !important;
+        }
+        .accessory-rail.selected {
+            box-shadow: 0 0 0 4px rgba(56,189,248,.35) !important;
+            outline: 2px solid #38bdf8 !important;
+            z-index: 45 !important;
+        }
+
         /* PRINT MEDIA */
         #print-area { display: none; }
 
@@ -2317,16 +2333,28 @@
 
     function handleHeightInput() {
         const h = getCurrentHeightValue();
+        const preferredSupport = selectedIdx >= 0 && platforms[selectedIdx]
+            ? getPlatformSupportId(platforms[selectedIdx])
+            : getCurrentSupportId();
+
+        refreshSupportOptions(preferredSupport);
+        const validSupportId = getCurrentSupportId();
+
         if(selectedIdx >= 0 && platforms[selectedIdx]) {
             pushUndo();
             platforms[selectedIdx].height = h;
+            if(!isSupportValidForHeight(getSupportPreset(platforms[selectedIdx].supportId), h)) {
+                platforms[selectedIdx].supportId = validSupportId;
+            }
         }
         updateAll();
     }
 
 
     function handleSupportInput() {
+        refreshSupportOptions(getCurrentSupportId());
         const supportId = getCurrentSupportId();
+
         if(selectedIdx >= 0 && platforms[selectedIdx]) {
             pushUndo();
             platforms[selectedIdx].supportId = supportId;
@@ -2373,6 +2401,48 @@
     function getSelectedSupportType(heightOverride=null, supportId=null) {
         const preset = getSupportPreset(supportId);
         return {...preset, auto:false, height: normalizeHeightValue(heightOverride ?? preset.nominalHeight)};
+    }
+
+
+    function isSupportValidForHeight(support, height) {
+        const h = normalizeHeightValue(height);
+        if(!support) return false;
+        if(support.range) {
+            return h >= support.range[0] - 0.001 && h <= support.range[1] + 0.001;
+        }
+        return Math.abs(h - support.nominalHeight) < 0.001;
+    }
+
+    function getFirstValidSupportId(height) {
+        const h = normalizeHeightValue(height);
+        const found = Object.entries(SUPPORT_PRESETS).find(([, support]) => isSupportValidForHeight(support, h));
+        return found ? found[0] : 'fixed_1_0';
+    }
+
+    function refreshSupportOptions(preferredId = null) {
+        const select = document.getElementById('support-select');
+        if(!select) return;
+
+        const h = getCurrentHeightValue();
+        const current = preferredId || select.value || getCurrentSupportId();
+        let firstValid = '';
+
+        Array.from(select.options).forEach(option => {
+            if(!option.value) return;
+            const support = SUPPORT_PRESETS[option.value];
+            if(!support) return;
+
+            const valid = isSupportValidForHeight(support, h);
+            option.hidden = !valid;
+            option.disabled = !valid;
+            if(valid && !firstValid) firstValid = option.value;
+        });
+
+        if(current && SUPPORT_PRESETS[current] && isSupportValidForHeight(SUPPORT_PRESETS[current], h)) {
+            select.value = current;
+        } else if(firstValid) {
+            select.value = firstValid;
+        }
     }
 
 
@@ -2708,7 +2778,12 @@
     }
 
     function applyProjectState(state) {
-        platforms = (state.platforms || []).map(p => ({...p, height: normalizeHeightValue(p.height ?? state.height ?? 0.8), supportId: p.supportId || state.support || 'fixed_1_0'}));
+        platforms = (state.platforms || []).map(p => {
+            const h = normalizeHeightValue(p.height ?? state.height ?? 0.8);
+            const rawSupportId = p.supportId || state.support || getFirstValidSupportId(h);
+            const supportId = isSupportValidForHeight(getSupportPreset(rawSupportId), h) ? rawSupportId : getFirstValidSupportId(h);
+            return {...p, height:h, supportId};
+        });
         railings = state.railings || [];
         stairs = state.stairs || [];
         manualNoRailEdges = state.manualNoRailEdges || [];
@@ -2937,14 +3012,58 @@
         if(!isDrawingMode) accessoryGhost.style.display = 'none';
     });
 
+
+    function selectPlatformByIndex(idx) {
+        if(idx < 0 || !platforms[idx]) return;
+        selectedIdx = idx;
+        selectedAccessory = null;
+
+        const hInput = document.getElementById('h-input');
+        const supportSelect = document.getElementById('support-select');
+
+        if(hInput) hInput.value = getPlatformHeight(platforms[idx]);
+        if(supportSelect) {
+            const supportId = getPlatformSupportId(platforms[idx]);
+            refreshSupportOptions(supportId);
+            if(isSupportValidForHeight(getSupportPreset(supportId), getCurrentHeightValue())) {
+                supportSelect.value = supportId;
+            } else {
+                platforms[idx].supportId = getCurrentSupportId();
+            }
+        }
+        updateAll();
+    }
+
+    function selectAccessoryByDataset(dataset) {
+        if(!dataset || !dataset.kind) return;
+        selectedIdx = -1;
+        selectedAccessory = {kind: dataset.kind, idx: parseInt(dataset.idx)};
+        updateAll();
+    }
+
+
+
+    canvasArea.addEventListener('dblclick', (e) => {
+        const platformEl = e.target.closest ? e.target.closest('.platform-rect') : null;
+        if(platformEl) {
+            selectPlatformByIndex(parseInt(platformEl.dataset.idx));
+            e.preventDefault();
+            e.stopPropagation();
+            return;
+        }
+
+        const accessoryEl = e.target.closest ? e.target.closest('[data-kind]') : null;
+        if(accessoryEl) {
+            selectAccessoryByDataset(accessoryEl.dataset);
+            e.preventDefault();
+            e.stopPropagation();
+        }
+    });
+
     canvasArea.addEventListener('mousedown', (e) => {
-        if(e.target.classList.contains('platform-rect')) {
-            selectedIdx = parseInt(e.target.dataset.idx);
-            const hInput = document.getElementById('h-input');
-            const supportSelect = document.getElementById('support-select');
-            if(hInput && platforms[selectedIdx]) hInput.value = getPlatformHeight(platforms[selectedIdx]);
-            if(supportSelect && platforms[selectedIdx]) supportSelect.value = getPlatformSupportId(platforms[selectedIdx]);
-            updateAll();
+        const platformEl = e.target.closest ? e.target.closest('.platform-rect') : null;
+        if(platformEl) {
+            selectPlatformByIndex(parseInt(platformEl.dataset.idx));
             e.stopPropagation();
             return;
         }
@@ -2985,6 +3104,7 @@
         const coords = getCoords(e);
         if(!isOverlapping(coords)) {
             pushUndo();
+            refreshSupportOptions(getCurrentSupportId());
             platforms.push({...coords, w: currentTool.w, h: currentTool.h, id: currentTool.id, height: getCurrentHeightValue(), supportId: getCurrentSupportId()});
             updateAll();
         } else updateAll();
@@ -3696,6 +3816,8 @@
         const perimLayer = document.getElementById('perimeter-layer');
         const aLayer = document.getElementById('accessories-layer');
         pLayer.innerHTML = ''; sLayer.innerHTML = ''; perimLayer.innerHTML = ''; aLayer.innerHTML = '';
+
+        refreshSupportOptions(getCurrentSupportId());
 
         let counts = { platforms: {}, platformHeights: {}, supportRows: {}, connector: 0, insert: 0, clamp_1: 0, clamp_2: 0, legs: 0, joints: 0, rail1:0, rail2:0, railCustom:0, railClamp:0, railWeight:0, railBrackets:{}, railJoiners:0, railStraightJoiners:0, railCornerJoiners:0, railAlJoiners:0, railSteelStraightJoiners:0, railSteelCornerJoiners:0, stairs:0, stairByArticle:{}, stairWeight:0, stairRailKits:0, stairAnchorKits:0, diagonals:0, frames:0 };
         const hNum = parseFloat(document.getElementById('h-input').value) || 0;
@@ -5036,6 +5158,11 @@
         renderPrint3DViews();
         setTimeout(() => window.print(), 120);
     }
+
+
+    window.addEventListener('load', () => {
+        try { refreshSupportOptions(getCurrentSupportId()); } catch(e) {}
+    });
 
 </script>
 </body>
