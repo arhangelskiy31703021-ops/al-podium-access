@@ -4,10 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AL-PODIUM IMLIGHT: Профессиональный инженерный расчет</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
-    <style>
+<style>
         :root {
             --bg-deep: #0f172a;
             --bg-panel: #1e293b;
@@ -1677,20 +1674,20 @@
                 <h1>AL-PODIUM<br>Engineering</h1>
             </div>
             <p class="login-info-subtitle">
-                Доступ через Supabase: пользователь входит по email/паролю и подтверждает общий код доступа.
+                Закрытый доступ для сотрудников без регистрации, email и базы пользователей.
             </p>
             <div class="login-feature-list">
-                <div class="login-feature"><b>1</b><div><b>Общий код</b><span>Код хранится на стороне Supabase и может быть изменён владельцем.</span></div></div>
-                <div class="login-feature"><b>2</b><div><b>Пользователи</b><span>Регистрация через email/пароль; пользователей можно удалять в Supabase Auth.</span></div></div>
-                <div class="login-feature"><b>3</b><div><b>Без пароля в HTML</b><span>В файле нет общего кода и нет его хэша — проверка идёт через RPC.</span></div></div>
+                <div class="login-feature"><b>1</b><div><b>Общий логин</b><span>Используется один служебный логин без привязки к конкретному человеку.</span></div></div>
+                <div class="login-feature"><b>2</b><div><b>Два секрета</b><span>Для входа требуются пароль и отдельный общий код доступа.</span></div></div>
+                <div class="login-feature"><b>3</b><div><b>Без Supabase</b><span>Сайт не отправляет данные авторизации в Supabase и не создаёт пользователей.</span></div></div>
             </div>
         </section>
         <section class="password-card">
             <h1>Вход в приложение</h1>
-            <div class="login-caption">Введите логин, пароль и общий код доступа.</div>
+            <div class="login-caption">Введите общий логин, пароль и код доступа.</div>
 
-            <label for="auth-email">Email</label>
-            <input id="auth-email" type="email" autocomplete="email" placeholder="name@example.com">
+            <label for="auth-login">Логин</label>
+            <input id="auth-login" type="text" autocomplete="username" placeholder="Логин" autocapitalize="none" spellcheck="false">
 
             <label for="auth-password">Пароль</label>
             <input id="auth-password" type="password" autocomplete="current-password" placeholder="Пароль">
@@ -1700,9 +1697,8 @@
 
             <div id="auth-error" class="login-auth-error" aria-live="polite"></div>
 
-            <button onclick="loginWithSupabase()">Войти</button>
-            <button class="login-secondary-action" onclick="registerWithSupabase()">Создать пользователя</button>
-            <div class="login-small-note">Для GitHub Pages: вставь SUPABASE_URL и SUPABASE_ANON_KEY в код файла index.html.</div>
+            <button onclick="loginApp()">Войти</button>
+            <div class="login-small-note">Регистрация отсутствует. Введённые значения проверяются только в браузере и не отправляются на сервер приложения.</div>
         </section>
     </div>
 </div>
@@ -1750,24 +1746,23 @@
     </div>
 
     <div class="project-info-panel">
-        <input type="text" id="user-fio" placeholder="ФИО Менеджера..." oninput="updateAll()">
-        <input type="text" id="project-name" placeholder="Заказчик / Объект..." oninput="updateAll()">
+        <input type="text" id="user-fio" placeholder="Код менеджера / отдел..." oninput="updateAll()">
+        <input type="text" id="project-name" placeholder="Объект / номер заказа..." oninput="updateAll()">
         <button class="btn-print" onclick="preparePrintAndPrint()">🖨 Печать PDF</button>
     </div>
 
     <div class="auth-profile" id="auth-profile" style="display:none;">
         <button class="auth-profile-main" type="button" onclick="toggleProfileMenu()">
-            <span class="auth-avatar" id="auth-avatar">?</span>
+            <span class="auth-avatar" id="auth-avatar">A</span>
             <span class="auth-profile-text">
-                <b id="auth-email-display">Пользователь</b>
-                <small id="auth-status-display">Supabase</small>
+                <b id="auth-email-display">Сотрудник</b>
+                <small id="auth-status-display">Локальный вход</small>
             </span>
             <span class="auth-chevron">▾</span>
         </button>
         <div class="auth-profile-menu" id="auth-profile-menu">
-            <div class="auth-menu-title">Профиль</div>
-            <div class="auth-menu-email" id="auth-menu-email">—</div>
-            <button type="button" onclick="refreshProfileInfo()">↻ Обновить профиль</button>
+            <div class="auth-menu-title">Доступ</div>
+            <div class="auth-menu-email" id="auth-menu-email">Общий служебный вход</div>
             <button type="button" onclick="logoutApp()">🚪 Выйти</button>
         </div>
     </div>
@@ -2029,44 +2024,31 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 
 
 
-    // === SUPABASE AUTH SETTINGS ===
-    // 1) Создайте проект Supabase.
-    // 2) Вставьте сюда Project URL и anon/public key из Project Settings > API.
-    // 3) Выполните SQL из файла al_podium_supabase_setup.sql.
-    const SUPABASE_URL = 'https://rbnytcuehmgseaytptwi.supabase.co';
-    const SUPABASE_ANON_KEY = 'sb_publishable_3D0cPQ94FDaf4wrbDuqCiw_v1Bvr56i';
-    let supabaseClient = null;
+    // === LOCAL SHARED ACCESS SETTINGS ===
+    // В HTML хранятся только SHA-256 хэши. Исходные значения указаны в инструкции к файлу.
+    // ВАЖНО: GitHub Pages остаётся статическим хостингом. Эта форма защищает от случайного доступа,
+    // но не заменяет серверную авторизацию и может быть обойдена технически подготовленным посетителем.
+    const ACCESS_LOGIN_SHA256 = '5e038e8f0bc199169a4aa98300617ad847781ad8d2187080e427e484784e04d9';
+    const ACCESS_PASSWORD_SHA256 = '20a57c6d1d8296b82faa859764c3b6ff65875c85e5267caf24637cc6517052e9';
+    const ACCESS_CODE_SHA256 = '09306292365e0ab82c95636cc4b74c540addb40312852c63105b8fd340a4215a';
 
-    function isSupabaseConfigured() {
-        return SUPABASE_URL && SUPABASE_ANON_KEY
-            && !SUPABASE_URL.includes('PASTE_')
-            && !SUPABASE_ANON_KEY.includes('PASTE_');
-    }
+    const AUTH_SESSION_KEY = 'al_podium_local_access_v1';
+    const AUTH_SESSION_TTL_MS = 8 * 60 * 60 * 1000;
+    const AUTH_MAX_ATTEMPTS = 5;
+    const AUTH_LOCK_MS = 5 * 60 * 1000;
+    let authFailedAttempts = 0;
+    let authLockedUntil = 0;
 
-    function getSupabaseClient() {
-        if(!isSupabaseConfigured()) {
-            throw new Error('Supabase не настроен: вставьте SUPABASE_URL и SUPABASE_ANON_KEY в HTML-файл перед загрузкой на GitHub.');
-        }
-        if(!window.supabase || !window.supabase.createClient) {
-            throw new Error('Не загрузилась библиотека Supabase. Проверьте интернет/CDN.');
-        }
-        if(!supabaseClient) {
-            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        }
-        return supabaseClient;
-    }
-
-    function setAuthError(message='') {
+    function setAuthError(message = '') {
         const el = document.getElementById('auth-error');
         if(el) el.textContent = message;
     }
 
-    function renderSupabaseLogin() {
+    function renderLocalLogin() {
         return `
             <div class="login-shell">
                 <section class="login-info-card">
@@ -2075,20 +2057,20 @@
                         <h1>AL-PODIUM<br>Engineering</h1>
                     </div>
                     <p class="login-info-subtitle">
-                        Доступ через Supabase: пользователь входит по email/паролю и подтверждает общий код доступа.
+                        Закрытый доступ для сотрудников без регистрации, email и базы пользователей.
                     </p>
                     <div class="login-feature-list">
-                        <div class="login-feature"><b>1</b><div><b>Общий код</b><span>Код хранится на стороне Supabase и может быть изменён владельцем.</span></div></div>
-                        <div class="login-feature"><b>2</b><div><b>Пользователи</b><span>Регистрация через email/пароль; пользователей можно удалять в Supabase Auth.</span></div></div>
-                        <div class="login-feature"><b>3</b><div><b>Без пароля в HTML</b><span>В файле нет общего кода и нет его хэша — проверка идёт через RPC.</span></div></div>
+                        <div class="login-feature"><b>1</b><div><b>Общий логин</b><span>Один служебный логин без привязки к конкретному человеку.</span></div></div>
+                        <div class="login-feature"><b>2</b><div><b>Два секрета</b><span>Для входа требуются пароль и отдельный общий код доступа.</span></div></div>
+                        <div class="login-feature"><b>3</b><div><b>Без Supabase</b><span>Авторизационные данные не отправляются во внешнюю базу.</span></div></div>
                     </div>
                 </section>
                 <section class="password-card">
                     <h1>Вход в приложение</h1>
-                    <div class="login-caption">Введите email, пароль и общий код доступа.</div>
+                    <div class="login-caption">Введите общий логин, пароль и код доступа.</div>
 
-                    <label for="auth-email">Email</label>
-                    <input id="auth-email" type="email" autocomplete="email" placeholder="name@example.com">
+                    <label for="auth-login">Логин</label>
+                    <input id="auth-login" type="text" autocomplete="username" placeholder="Логин" autocapitalize="none" spellcheck="false">
 
                     <label for="auth-password">Пароль</label>
                     <input id="auth-password" type="password" autocomplete="current-password" placeholder="Пароль">
@@ -2097,112 +2079,63 @@
                     <input id="auth-code" type="password" autocomplete="off" placeholder="Общий код">
 
                     <div id="auth-error" class="login-auth-error" aria-live="polite"></div>
-
-                    <button onclick="loginWithSupabase()">Войти</button>
-                    <button class="login-secondary-action" onclick="registerWithSupabase()">Создать пользователя</button>
-                    <div class="login-small-note">Если вы владелец: код меняется в таблице Supabase, пользователи удаляются в Authentication → Users.</div><div class="github-setup-note">Для публикации на GitHub Pages переименуй файл в index.html.</div>
+                    <button onclick="loginApp()">Войти</button>
+                    <div class="login-small-note">Регистрация отсутствует. Проверка выполняется локально в браузере.</div>
                 </section>
             </div>
         `;
     }
 
     function getAuthInputs() {
-        const email = (document.getElementById('auth-email')?.value || '').trim();
+        const login = (document.getElementById('auth-login')?.value || '').trim().toLowerCase();
         const password = document.getElementById('auth-password')?.value || '';
-        const code = document.getElementById('auth-code')?.value || '';
-        return { email, password, code };
+        const code = (document.getElementById('auth-code')?.value || '').trim();
+        return { login, password, code };
     }
 
-    async function verifyCommonCode(code) {
-        if(!code) return false;
-        const sb = getSupabaseClient();
-        const { data, error } = await sb.rpc('verify_access_code', { p_code: code });
-        if(error) throw error;
-        return data === true;
-    }
-
-    async function loginWithSupabase() {
-        try {
-            setAuthError('');
-            const { email, password, code } = getAuthInputs();
-            if(!email || !password || !code) {
-                setAuthError('Заполните email, пароль и общий код.');
-                return;
-            }
-
-            const okCode = await verifyCommonCode(code);
-            if(!okCode) {
-                document.getElementById('password-overlay').innerHTML = '<div class="access-blocked">ДОСТУП ЗАБЛОКИРОВАН</div>';
-                return;
-            }
-
-            const sb = getSupabaseClient();
-            const { error } = await sb.auth.signInWithPassword({ email, password });
-            if(error) throw error;
-
-            const { data: sessionData } = await getSupabaseClient().auth.getSession();
-            updateProfilePanel(sessionData?.session || null);
-            const overlay = document.getElementById('password-overlay');
-            if(overlay) overlay.style.display = 'none';
-        } catch(err) {
-            setAuthError(err.message || 'Не удалось войти.');
+    async function sha256Hex(value) {
+        if(!window.crypto?.subtle) {
+            throw new Error('Браузер не поддерживает безопасную проверку входа. Откройте сайт через HTTPS в современном браузере.');
         }
+        const bytes = new TextEncoder().encode(value);
+        const digest = await window.crypto.subtle.digest('SHA-256', bytes);
+        return Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, '0')).join('');
     }
 
-    async function registerWithSupabase() {
+    function setAuthorizedSession() {
+        sessionStorage.setItem(AUTH_SESSION_KEY, JSON.stringify({
+            authorized: true,
+            expiresAt: Date.now() + AUTH_SESSION_TTL_MS
+        }));
+    }
+
+    function hasAuthorizedSession() {
         try {
-            setAuthError('');
-            const { email, password, code } = getAuthInputs();
-            if(!email || !password || !code) {
-                setAuthError('Заполните email, пароль и общий код.');
-                return;
-            }
-            if(password.length < 6) {
-                setAuthError('Пароль пользователя должен быть минимум 6 символов.');
-                return;
-            }
-
-            const okCode = await verifyCommonCode(code);
-            if(!okCode) {
-                document.getElementById('password-overlay').innerHTML = '<div class="access-blocked">ДОСТУП ЗАБЛОКИРОВАН</div>';
-                return;
-            }
-
-            const sb = getSupabaseClient();
-            const { error } = await sb.auth.signUp({ email, password });
-            if(error) throw error;
-
-            setAuthError('Пользователь создан. Если в Supabase включено подтверждение email — подтвердите письмо, затем войдите.');
+            const raw = sessionStorage.getItem(AUTH_SESSION_KEY);
+            if(!raw) return false;
+            const session = JSON.parse(raw);
+            if(session?.authorized === true && Number(session.expiresAt) > Date.now()) return true;
         } catch(err) {
-            setAuthError(err.message || 'Не удалось зарегистрироваться.');
+            console.warn('Не удалось прочитать локальную сессию:', err);
         }
+        sessionStorage.removeItem(AUTH_SESSION_KEY);
+        return false;
     }
 
-
-    function updateProfilePanel(session) {
+    function updateProfilePanel(isAuthorized) {
         const profile = document.getElementById('auth-profile');
-        const emailDisplay = document.getElementById('auth-email-display');
-        const emailMenu = document.getElementById('auth-menu-email');
+        const userDisplay = document.getElementById('auth-email-display');
+        const userMenu = document.getElementById('auth-menu-email');
         const avatar = document.getElementById('auth-avatar');
         const status = document.getElementById('auth-status-display');
-
-        const email = session?.user?.email || '';
         if(!profile) return;
 
-        if(email) {
-            profile.style.display = 'block';
-            if(emailDisplay) emailDisplay.textContent = email;
-            if(emailMenu) emailMenu.textContent = email;
-            if(avatar) avatar.textContent = email.slice(0,1).toUpperCase();
-            if(status) status.textContent = 'Вход выполнен';
-        } else {
-            profile.style.display = 'none';
-            profile.classList.remove('open');
-            if(emailDisplay) emailDisplay.textContent = 'Пользователь';
-            if(emailMenu) emailMenu.textContent = '—';
-            if(avatar) avatar.textContent = '?';
-            if(status) status.textContent = 'Supabase';
-        }
+        profile.style.display = isAuthorized ? 'block' : 'none';
+        profile.classList.remove('open');
+        if(userDisplay) userDisplay.textContent = 'Сотрудник';
+        if(userMenu) userMenu.textContent = 'Общий служебный вход';
+        if(avatar) avatar.textContent = 'A';
+        if(status) status.textContent = 'Локальный вход';
     }
 
     function toggleProfileMenu() {
@@ -2210,85 +2143,96 @@
         if(profile) profile.classList.toggle('open');
     }
 
-    async function refreshProfileInfo() {
-        try {
-            const sb = getSupabaseClient();
-            const { data } = await sb.auth.getSession();
-            updateProfilePanel(data?.session || null);
-        } catch(err) {
-            console.warn(err);
-        }
-    }
-
-    document.addEventListener('click', (event) => {
+    document.addEventListener('click', event => {
         const profile = document.getElementById('auth-profile');
         if(profile && !profile.contains(event.target)) profile.classList.remove('open');
     });
 
-
-    async function logoutApp() {
+    async function loginApp() {
         try {
-            if(isSupabaseConfigured()) {
-                await getSupabaseClient().auth.signOut();
+            setAuthError('');
+            const now = Date.now();
+            if(authLockedUntil > now) {
+                const seconds = Math.ceil((authLockedUntil - now) / 1000);
+                setAuthError(`Слишком много попыток. Повторите через ${seconds} сек.`);
+                return;
             }
+
+            const { login, password, code } = getAuthInputs();
+            if(!login || !password || !code) {
+                setAuthError('Заполните логин, пароль и общий код.');
+                return;
+            }
+
+            const [loginHash, passwordHash, codeHash] = await Promise.all([
+                sha256Hex(login),
+                sha256Hex(password),
+                sha256Hex(code)
+            ]);
+
+            const valid = loginHash === ACCESS_LOGIN_SHA256
+                && passwordHash === ACCESS_PASSWORD_SHA256
+                && codeHash === ACCESS_CODE_SHA256;
+
+            if(!valid) {
+                authFailedAttempts += 1;
+                if(authFailedAttempts >= AUTH_MAX_ATTEMPTS) {
+                    authFailedAttempts = 0;
+                    authLockedUntil = Date.now() + AUTH_LOCK_MS;
+                    setAuthError('Доступ временно заблокирован на 5 минут.');
+                } else {
+                    setAuthError(`Неверные данные. Осталось попыток: ${AUTH_MAX_ATTEMPTS - authFailedAttempts}.`);
+                }
+                return;
+            }
+
+            authFailedAttempts = 0;
+            authLockedUntil = 0;
+            setAuthorizedSession();
+            updateProfilePanel(true);
+            const overlay = document.getElementById('password-overlay');
+            if(overlay) overlay.style.display = 'none';
         } catch(err) {
-            console.warn(err);
+            setAuthError(err?.message || 'Не удалось выполнить вход.');
         }
-        updateProfilePanel(null);
+    }
+
+    function logoutApp() {
+        sessionStorage.removeItem(AUTH_SESSION_KEY);
+        updateProfilePanel(false);
         const overlay = document.getElementById('password-overlay');
         if(overlay) {
             overlay.style.display = 'flex';
-            overlay.innerHTML = renderSupabaseLogin();
-            const email = document.getElementById('auth-email');
-            if(email) email.focus();
+            overlay.innerHTML = renderLocalLogin();
             attachAuthEnterHandlers();
+            document.getElementById('auth-login')?.focus();
         }
     }
 
     function attachAuthEnterHandlers() {
-        ['auth-email','auth-password','auth-code'].forEach(id => {
+        ['auth-login', 'auth-password', 'auth-code'].forEach(id => {
             const el = document.getElementById(id);
-            if(el) el.addEventListener('keydown', e => {
-                if(e.key === 'Enter') loginWithSupabase();
+            if(el) el.addEventListener('keydown', event => {
+                if(event.key === 'Enter') loginApp();
             });
         });
     }
 
-    async function initPasswordGate() {
+    function initPasswordGate() {
         const overlay = document.getElementById('password-overlay');
         if(!overlay) return;
 
-        if(!isSupabaseConfigured()) {
-            updateProfilePanel(null);
+        if(hasAuthorizedSession()) {
+            updateProfilePanel(true);
+            overlay.style.display = 'none';
+        } else {
+            updateProfilePanel(false);
             overlay.style.display = 'flex';
-            setTimeout(() => setAuthError('Supabase не настроен: вставьте SUPABASE_URL и SUPABASE_ANON_KEY.'), 50);
             attachAuthEnterHandlers();
-            return;
-        }
-
-        try {
-            const sb = getSupabaseClient();
-            const { data } = await sb.auth.getSession();
-            if(data && data.session) {
-                updateProfilePanel(data.session);
-                overlay.style.display = 'none';
-            } else {
-                updateProfilePanel(null);
-                overlay.style.display = 'flex';
-                attachAuthEnterHandlers();
-            }
-
-            sb.auth.onAuthStateChange((_event, session) => {
-                updateProfilePanel(session);
-                const currentOverlay = document.getElementById('password-overlay');
-                if(currentOverlay) currentOverlay.style.display = session ? 'none' : 'flex';
-            });
-        } catch(err) {
-            overlay.style.display = 'flex';
-            setAuthError(err.message || 'Ошибка подключения Supabase.');
-            attachAuthEnterHandlers();
+            document.getElementById('auth-login')?.focus();
         }
     }
+
     window.addEventListener('DOMContentLoaded', initPasswordGate);
 
     const GRID = 80; 
